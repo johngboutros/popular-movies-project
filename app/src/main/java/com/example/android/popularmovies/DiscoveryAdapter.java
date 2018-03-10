@@ -88,7 +88,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     public void onBindViewHolder(DiscoveryAdapter.ViewHolder holder, int position) {
 
 
-        Picasso.with(context).load(movies.get(position).getUrl())
+        Picasso.with(context).load(movies.get(position).getPosterPath())
                 .fit()
                 .centerCrop()
                 .placeholder(R.drawable.bg_movie_thumb)
@@ -104,7 +104,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 //            }
 //        });
 //
-//        builder.build().load(movies.get(position).getUrl())
+//        builder.build().load(movies.get(position).getPosterPath())
 //                .fit()
 //                .centerCrop()
 //                .placeholder(R.drawable.bg_movie_thumb)

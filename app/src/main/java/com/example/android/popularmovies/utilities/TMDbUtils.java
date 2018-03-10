@@ -39,7 +39,7 @@ public class TMDbUtils {
     // Movie path
     // Example API request:
     // https://api.themoviedb.org/3/movie/550?api_key=[YOUR_API_KEY]
-    private static final String MOVIE_PATH = "/movie/#";
+    private static final String MOVIE_PATH = "/movie/%s";
 
 
     // Discover path
@@ -150,12 +150,38 @@ public class TMDbUtils {
                 .appendQueryParameter(SORT_BY_PARAM, buildSortOption(sortBy, sortDirection))
                 .build();
 
+        return buildUrl(uri);
+    }
+
+    /**
+     * Returns a URL to a movie GET request.
+     *
+     * @param movieId the movie ID
+     * @return URL to a movie GET request
+     */
+    public static URL buildMovieUrl(@NonNull Integer movieId) {
+
+        Uri uri = Uri.parse(API_BASE_URL + String.format(MOVIE_PATH, movieId.toString()))
+                .buildUpon()
+                .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                .build();
+
+        return buildUrl(uri);
+    }
+
+    /**
+     * Builds a URL for a given URI.
+     *
+     * @param uri the URI to build a URL from
+     * @return URL for the given URI
+     */
+    private static URL buildUrl(@NonNull Uri uri) {
         try {
             URL url = new URL(uri.toString());
-            Log.v(TAG, "URL: " + url);
+            Log.v(TAG, "URL built: " + url);
             return url;
         } catch (MalformedURLException e) {
-            Log.e(TAG, "ERROR buildDiscoveryUrl: " + e.getMessage());
+            Log.e(TAG, "ERROR building URL (" + uri.toString() + "): " + e.getMessage());
             e.printStackTrace();
             return null;
         }
