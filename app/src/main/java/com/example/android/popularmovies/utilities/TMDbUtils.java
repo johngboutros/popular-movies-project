@@ -42,6 +42,25 @@ public class TMDbUtils {
     private static final String MOVIE_PATH = "/movie/%s";
 
 
+    // Poster URL
+    // Example:
+    // http://image.tmdb.org/t/p/w185/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
+    // Poster base URL will look like: http://image.tmdb.org/t/p/.
+    private static final String POSTER_BASE_URL = "http://image.tmdb.org/t/p/";
+    // Poster ‘size’, which will be one of the following: "w92", "w154", "w185", "w342", "w500",
+    // "w780", or "original". For most phones we recommend using “w185”.
+    private static String POSTER_SIZE_W92 = "w92";
+    private static String POSTER_SIZE_W154 = "w154";
+    private static String POSTER_SIZE_W185 = "w185";
+    private static String POSTER_SIZE_W342 = "w342";
+    private static String POSTER_SIZE_W500 = "w500";
+    private static String POSTER_SIZE_W780 = "w780";
+    private static String POSTER_SIZE_ORIGINAL = "original";
+
+    public enum PosterSize {
+        W92, W154, W185, W342, W500, W780, ORIGINAL
+    }
+
     // Discover path
     // Example API requests:
     // https://api.themoviedb.org/3/discover/movie?api_key=<<api_key>>&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1
@@ -170,6 +189,50 @@ public class TMDbUtils {
     }
 
     /**
+     * Builds a string representation for a movie poster URL
+     *
+     * @param posterPath The path to a movie poster as returned by TMDb API
+     * @param posterSize The preferred poster size
+     * @return
+     */
+    public static String buildPosterURL(@NonNull String posterPath, @NonNull PosterSize posterSize) {
+        String baseUrl = POSTER_BASE_URL;
+        String sizeSegment = null;
+
+        switch (posterSize) {
+            case W92:
+                sizeSegment = POSTER_SIZE_W92;
+                break;
+            case W154:
+                sizeSegment = POSTER_SIZE_W154;
+                break;
+            case W185:
+                sizeSegment = POSTER_SIZE_W185;
+                break;
+            case W342:
+                sizeSegment = POSTER_SIZE_W342;
+                break;
+            case W500:
+                sizeSegment = POSTER_SIZE_W500;
+                break;
+            case W780:
+                sizeSegment = POSTER_SIZE_W780;
+                break;
+            case ORIGINAL:
+                sizeSegment = POSTER_SIZE_ORIGINAL;
+                break;
+            default:
+                sizeSegment = POSTER_SIZE_W185;
+        }
+
+        String posterUrl = baseUrl + sizeSegment + posterPath;
+
+        Log.d(TAG,"Poster URL built: " + posterUrl);
+
+        return posterUrl;
+    }
+
+    /**
      * Builds a URL for a given URI.
      *
      * @param uri the URI to build a URL from
@@ -178,7 +241,7 @@ public class TMDbUtils {
     private static URL buildUrl(@NonNull Uri uri) {
         try {
             URL url = new URL(uri.toString());
-            Log.v(TAG, "URL built: " + url);
+            Log.d(TAG, "URL built: " + url);
             return url;
         } catch (MalformedURLException e) {
             Log.e(TAG, "ERROR building URL (" + uri.toString() + "): " + e.getMessage());

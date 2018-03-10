@@ -37,21 +37,6 @@ public class DiscoveryActivity extends AppCompatActivity {
     @BindInt(R.integer.discovery_grid_columns)
     int gridColumns;
 
-    // TODO delete this dummy array
-    // Dummy movies posters for testing
-    private final Movie testMovies[] = {
-            new Movie("https://api.learn2crack.com/android/images/donut.png"),
-            new Movie("https://api.learn2crack.com/android/images/eclair.png"),
-            new Movie("https://api.learn2crack.com/android/images/froyo.png"),
-            new Movie("https://api.learn2crack.com/android/images/ginger.png"),
-            new Movie("https://api.learn2crack.com/android/images/honey.png"),
-            new Movie("https://api.learn2crack.com/android/images/icecream.png"),
-            new Movie("https://api.learn2crack.com/android/images/jellybean.png"),
-            new Movie("https://api.learn2crack.com/android/images/kitkat.png"),
-            new Movie("https://api.learn2crack.com/android/images/lollipop.png"),
-            new Movie("https://api.learn2crack.com/android/images/marshmallow.png")
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,23 +48,30 @@ public class DiscoveryActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, gridColumns);
         discoveryRecyclerView.setLayoutManager(layoutManager);
 
-        DiscoveryAdapter adapter = new DiscoveryAdapter(this, Arrays.asList(testMovies));
-        discoveryRecyclerView.setAdapter(adapter);
+//        DiscoveryAdapter adapter = new DiscoveryAdapter(this, Arrays.asList(testMovies));
+//        discoveryRecyclerView.setAdapter(adapter);
 
         // TODO Delete this test code
         // Testing Volley
         Request movieRequest
-                = new GsonRequest<Movie>(Request.Method.GET,
-                TMDbUtils.buildMovieUrl(550).toString(),
+                = new GsonRequest<Movie.Page>(Request.Method.GET,
+                TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.POPULARITY).toString(),
                 null,
-                Movie.class,
+                Movie.Page.class,
                 null,
-                new Response.Listener<Movie>() {
+                new Response.Listener<Movie.Page>() {
                     @Override
-                    public void onResponse(Movie movie) {
+                    public void onResponse(Movie.Page moviePage) {
 //                        Log.d(TAG, "Response: " + response.toString());
 //                        Movie movie = new Gson().fromJson(response.toString(), Movie.class);
-                        Log.d(TAG, "Movie: " + movie);
+//                        Log.d(TAG, "Movie: " + movie);
+                        Log.d(TAG, "Movie Page: " + moviePage);
+
+                        DiscoveryAdapter adapter
+                                = new DiscoveryAdapter(DiscoveryActivity.this
+                                , moviePage.getResults());
+
+                        discoveryRecyclerView.setAdapter(adapter);
                     }
                 }, new Response.ErrorListener() {
             @Override

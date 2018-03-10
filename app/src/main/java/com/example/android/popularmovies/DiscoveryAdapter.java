@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.utilities.TMDbUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -87,8 +88,12 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     @Override
     public void onBindViewHolder(DiscoveryAdapter.ViewHolder holder, int position) {
 
+        String posterPath = movies.get(position).getPosterPath();
 
-        Picasso.with(context).load(movies.get(position).getPosterPath())
+        String posterURL = TMDbUtils.buildPosterURL(posterPath, TMDbUtils.PosterSize.W185);
+
+        // FIXME BUG: Sometimes app crashes on orientation change (finalized Assets Manager?)
+        Picasso.with(context).load(posterURL)
                 .fit()
                 .centerCrop()
                 .placeholder(R.drawable.bg_movie_thumb)

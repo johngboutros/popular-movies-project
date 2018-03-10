@@ -1,5 +1,7 @@
 package com.example.android.popularmovies.data;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -27,20 +29,28 @@ public class Movie {
     //  video               boolean             optional
     //  vote_average        number              optional
 
+    @SerializedName("poster_path")
     private String posterPath;
     private boolean adult;
     private String overview;
-    private String release_date;
+    @SerializedName("release_date")
+    private String releaseDate;
+    @SerializedName("genre_ids")
     private List<Integer> genreIds;
     private List<Genre> genres;
     private Integer id;
+    @SerializedName("original_title")
     private String originalTitle;
+    @SerializedName("original_language")
     private String originalLanguage;
     private String title;
+    @SerializedName("backdrop_path")
     private String backdropPath;
     private float popularity;
+    @SerializedName("vote_count")
     private Integer voteCount;
     private boolean video;
+    @SerializedName("vote_average")
     private float voteAverage;
 
     public static class Genre {
@@ -72,13 +82,63 @@ public class Movie {
         }
     }
 
-    public Movie() {
+    // page            integer         optional
+    // results         array[Movie]    optional
+    // total_results   integer         optional
+    // total_pages     integer         optional
+    public static class Page {
+        private Integer page;
+        private List<Movie> results;
+        @SerializedName("total_results")
+        private Integer totalResults;
+        @SerializedName("total_pages")
+        private Integer totalPages;
+
+        public Integer getPage() {
+            return page;
+        }
+
+        public void setPage(Integer page) {
+            this.page = page;
+        }
+
+        public List<Movie> getResults() {
+            return results;
+        }
+
+        public void setResults(List<Movie> results) {
+            this.results = results;
+        }
+
+        public Integer getTotalResults() {
+            return totalResults;
+        }
+
+        public void setTotalResults(Integer totalResults) {
+            this.totalResults = totalResults;
+        }
+
+        public Integer getTotalPages() {
+            return totalPages;
+        }
+
+        public void setTotalPages(Integer totalPages) {
+            this.totalPages = totalPages;
+        }
+
+        @Override
+        public String toString() {
+            return "Page{" +
+                    "page=" + page +
+                    ", results=" + results +
+                    ", totalResults=" + totalResults +
+                    ", totalPages=" + totalPages +
+                    '}';
+        }
     }
 
-    // TODO Delete this constructor
-    // Poster path constructor for simpler testing
-    public Movie(String posterPath) {
-        setPosterPath(posterPath);
+
+    public Movie() {
     }
 
     public String getPosterPath() {
@@ -105,12 +165,12 @@ public class Movie {
         this.overview = overview;
     }
 
-    public String getRelease_date() {
-        return release_date;
+    public String getReleaseDate() {
+        return releaseDate;
     }
 
-    public void setRelease_date(String release_date) {
-        this.release_date = release_date;
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
     }
 
     public List<Integer> getGenreIds() {
@@ -207,7 +267,7 @@ public class Movie {
                 "posterPath='" + posterPath + '\'' +
                 ", adult=" + adult +
                 ", overview='" + overview + '\'' +
-                ", release_date='" + release_date + '\'' +
+                ", releaseDate='" + releaseDate + '\'' +
                 ", genreIds=" + genreIds +
                 ", genres=" + genres +
                 ", id=" + id +
