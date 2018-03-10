@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
@@ -13,8 +14,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.utilities.GsonRequest;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.utilities.TMDbUtils;
+import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
@@ -25,6 +28,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class DiscoveryActivity extends AppCompatActivity {
+
+    private static final String TAG = DiscoveryActivity.class.getSimpleName();
 
     @BindView(R.id.discovery_list_rv)
     RecyclerView discoveryRecyclerView;
@@ -63,21 +68,25 @@ public class DiscoveryActivity extends AppCompatActivity {
 
         // TODO Delete this test code
         // Testing Volley
-        JsonObjectRequest movieRequest
-                = new JsonObjectRequest(Request.Method.GET,
+        Request movieRequest
+                = new GsonRequest<Movie>(Request.Method.GET,
                 TMDbUtils.buildMovieUrl(550).toString(),
                 null,
-                new Response.Listener<JSONObject>() {
+                Movie.class,
+                null,
+                new Response.Listener<Movie>() {
                     @Override
-                    public void onResponse(JSONObject response) {
-                        Toast.makeText(DiscoveryActivity.this,
-                                response.toString(), Toast.LENGTH_LONG).show();
+                    public void onResponse(Movie movie) {
+//                        Log.d(TAG, "Response: " + response.toString());
+//                        Movie movie = new Gson().fromJson(response.toString(), Movie.class);
+                        Log.d(TAG, "Movie: " + movie);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(DiscoveryActivity.this,
-                        "VolleyError: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                        "Couldn't load movie", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "VolleyError: " + error.getMessage());
             }
         });
 

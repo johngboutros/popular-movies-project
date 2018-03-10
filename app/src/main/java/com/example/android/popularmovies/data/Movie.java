@@ -8,24 +8,24 @@ import java.util.List;
 
 public class Movie {
 
-    //    poster_path         string or null      optional
-    //    adult               boolean             optional
-    //    overview            string              optional
-    //    release_date        string              optional
-    //    genre_ids           array[integer]      optional
-    // OR
-    //    genres              array[object]       optional
+    //  poster_path         string or null      optional
+    //  adult               boolean             optional
+    //  overview            string              optional
+    //  release_date        string              optional
+    //  genre_ids           array[integer]      optional
+    //  | OR
+    //  genres              array[object]       optional
     //      id                    integer           optional
     //      name                  string            optional
-    //    id                  integer             optional
-    //    original_title      string              optional
-    //    original_language   string              optional
-    //    title               string              optional
-    //    backdrop_path       string or null      optional
-    //    popularity          number              optional
-    //    vote_count          integer             optional
-    //    video               boolean             optional
-    //    vote_average        number              optional
+    //  id                  integer             optional
+    //  original_title      string              optional
+    //  original_language   string              optional
+    //  title               string              optional
+    //  backdrop_path       string or null      optional
+    //  popularity          number              optional
+    //  vote_count          integer             optional
+    //  video               boolean             optional
+    //  vote_average        number              optional
 
     private String posterPath;
     private boolean adult;
@@ -61,6 +61,14 @@ public class Movie {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return "Genre{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    '}';
         }
     }
 
@@ -191,5 +199,26 @@ public class Movie {
 
     public void setVoteAverage(float voteAverage) {
         this.voteAverage = voteAverage;
+    }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "posterPath='" + posterPath + '\'' +
+                ", adult=" + adult +
+                ", overview='" + overview + '\'' +
+                ", release_date='" + release_date + '\'' +
+                ", genreIds=" + genreIds +
+                ", genres=" + genres +
+                ", id=" + id +
+                ", originalTitle='" + originalTitle + '\'' +
+                ", originalLanguage='" + originalLanguage + '\'' +
+                ", title='" + title + '\'' +
+                ", backdropPath='" + backdropPath + '\'' +
+                ", popularity=" + popularity +
+                ", voteCount=" + voteCount +
+                ", video=" + video +
+                ", voteAverage=" + voteAverage +
+                '}';
     }
 }
