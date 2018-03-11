@@ -154,7 +154,7 @@ public class TMDbUtils {
      * @param sortBy sort option
      * @return url for a discovery movies list request
      */
-    public static URL buildDiscoveryUrl(@NonNull SortBy sortBy) {
+    public static URL buildDiscoveryUrl(@NonNull SortBy sortBy, Integer page) {
 
         // Default sort direction
         SortDirection sortDirection;
@@ -164,10 +164,15 @@ public class TMDbUtils {
             sortDirection = SortDirection.DESC;
         }
 
-        Uri uri = Uri.parse(API_BASE_URL + DISCOVER_PATH).buildUpon()
+        Uri.Builder builder = Uri.parse(API_BASE_URL + DISCOVER_PATH).buildUpon()
                 .appendQueryParameter(API_KEY_PARAM, API_KEY)
-                .appendQueryParameter(SORT_BY_PARAM, buildSortOption(sortBy, sortDirection))
-                .build();
+                .appendQueryParameter(SORT_BY_PARAM, buildSortOption(sortBy, sortDirection));
+
+        if (page != null && page > 0) {
+            builder.appendQueryParameter(PAGE_PARAM, page.toString());
+        }
+
+        Uri uri = builder.build();
 
         return buildUrl(uri);
     }
