@@ -1,14 +1,23 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.example.android.popularmovies.components.PaginationScrollListener;
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.utilities.GsonRequest;
+import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.utilities.TMDbUtils;
 import com.squareup.picasso.Picasso;
 
@@ -24,18 +33,35 @@ import butterknife.ButterKnife;
 
 public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.ViewHolder> {
 
-    private Context context;
+    private static final String TAG = DiscoveryAdapter.class.getSimpleName();
+    private final Context context;
+    private final LinearLayoutManager layoutManager;
 
     // Discovered movies list
     private List<Movie> movies = new ArrayList<Movie>();
 
+    // Discovered pages count
+    private int pageCount;
+
+    // Total result pages count
+    private int totalPageCount;
+
+    // Loading flag
+    private boolean isLoading;
+
+    // Discovery custom RecyclerView OnScrollListener
+    private final PaginationScrollListener scrollListener;
+
     /**
      * Initializes the adapter with a {@link Context} and discovery movies data
      *
-     * @param context typically the container activity
+     * @param context       typically the container activity
+     * @param layoutManager {@link RecyclerView}'s LayoutManager
      */
-    public DiscoveryAdapter(Context context) {
+    public DiscoveryAdapter(Context context, LinearLayoutManager layoutManager) {
         this.context = context;
+        this.layoutManager = layoutManager;
+        this.scrollListener = new DiscoveryScrollListener(layoutManager);
     }
 
     /**
@@ -142,7 +168,13 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         }
     }
 
-
+    /**
+     * Adds a movie to the adapter and notifies any registered observers that the item reflected at
+     * position has been newly inserted. The item previously at position is now at position
+     * position + 1.
+     *
+     * @param movie
+     */
     public void add(Movie movie) {
         movies.add(movie);
         notifyItemInserted(movies.size() - 1);
@@ -157,5 +189,124 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         for (Movie movie : movies) {
             add(movie);
         }
+    }
+
+    public void remove(Movie city) {
+        int position = movies.indexOf(city);
+        if (position > -1) {
+            movies.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    public void clear() {
+        isLoading = false;
+        while (getItemCount() > 0) {
+            remove(getItem(0));
+        }
+    }
+
+    public boolean isEmpty() {
+        return getItemCount() == 0;
+    }
+
+    public void addLoadingFooter() {
+        isLoading = true;
+        add(new Movie());
+    }
+
+    public void removeLoadingFooter() {
+        isLoading = false;
+
+        int position = movies.size() - 1;
+        Movie item = getItem(position);
+
+        if (item != null) {
+            movies.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    public Movie getItem(int position) {
+        return movies.get(position);
+    }
+
+    /**
+     * Loads more movies.
+     */
+    public void discoverMore() {
+
+        Integer page = pageCount > 0 ? pageCount + 1 : null;
+        isLoading = true;
+
+        Request movieRequest
+                = new GsonRequest<Movie.Page>(Request.Method.GET,
+                TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.POPULARITY, page).toString(),
+                null,
+                Movie.Page.class,
+                null,
+                new Response.Listener<Movie.Page>() {
+                    @Override
+                    public void onResponse(Movie.Page moviePage) {
+                        isLoading = false;
+                        Log.d(TAG, "Movie Page: " + moviePage);
+
+                        pageCount = moviePage.getPage();
+                        totalPageCount = moviePage.getTotalPages();
+                        addAll(moviePage.getResults());
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        isLoading = false;
+                        Toast.makeText(context,
+                                "Couldn't load movies", Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "VolleyError: " + error.getMessage());
+                    }
+                });
+
+        NetworkUtils.get(context).addToRequestQueue(movieRequest);
+    }
+
+    /**
+     * Custom Pagination Scroll Listener.
+     */
+    private class DiscoveryScrollListener extends PaginationScrollListener {
+
+        public DiscoveryScrollListener(LinearLayoutManager layoutManager) {
+            super(layoutManager);
+        }
+
+        @Override
+        protected void loadMoreItems() {
+            discoverMore();
+        }
+
+        @Override
+        public int getTotalPageCount() {
+            return totalPageCount;
+        }
+
+        @Override
+        public boolean isLastPage() {
+            return pageCount >= getTotalPageCount();
+        }
+
+        @Override
+        public boolean isLoading() {
+            return isLoading;
+        }
+    }
+
+    /**
+     * Returns an {@link android.support.v7.widget.RecyclerView.OnScrollListener} instance to be
+     * set to the {@link RecyclerView}.
+     *
+     * @return an {@link android.support.v7.widget.RecyclerView.OnScrollListener} instance
+     */
+    public PaginationScrollListener getScrollListener() {
+        return scrollListener;
     }
 }

@@ -34,18 +34,6 @@ public class DiscoveryActivity extends AppCompatActivity {
     // Discovery Adapter
     private DiscoveryAdapter discoveryAdapter;
 
-    // Discovery custom RecyclerView OnScrollListener
-    private PaginationScrollListener scrollListener;
-
-    // Discovered pages count
-    private int pageCount;
-
-    // Total result pages count
-    private int totalPageCount;
-
-    // Loading flag
-    private boolean isLoading;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,73 +45,10 @@ public class DiscoveryActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(this, gridColumns);
         discoveryRecyclerView.setLayoutManager(layoutManager);
 
-        discoveryAdapter = new DiscoveryAdapter(this);
+        discoveryAdapter = new DiscoveryAdapter(this, layoutManager);
         discoveryRecyclerView.setAdapter(discoveryAdapter);
-        discoveryRecyclerView.addOnScrollListener(new DiscoveryScrollListener(layoutManager));
+        discoveryRecyclerView.addOnScrollListener(discoveryAdapter.getScrollListener());
 
-        discoverMore();
-    }
-
-    private void discoverMore() {
-
-        Integer page = pageCount > 0 ? pageCount + 1 : null;
-        isLoading = true;
-
-        Request movieRequest
-                = new GsonRequest<Movie.Page>(Request.Method.GET,
-                TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.POPULARITY, page).toString(),
-                null,
-                Movie.Page.class,
-                null,
-                new Response.Listener<Movie.Page>() {
-                    @Override
-                    public void onResponse(Movie.Page moviePage) {
-                        isLoading = false;
-                        Log.d(TAG, "Movie Page: " + moviePage);
-
-                        pageCount = moviePage.getPage();
-                        totalPageCount = moviePage.getTotalPages();
-                        discoveryAdapter.addAll(moviePage.getResults());
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        isLoading = false;
-                        Toast.makeText(DiscoveryActivity.this,
-                                "Couldn't load movies", Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "VolleyError: " + error.getMessage());
-                    }
-                });
-
-        NetworkUtils.get(this).addToRequestQueue(movieRequest);
-    }
-
-    private class DiscoveryScrollListener extends PaginationScrollListener {
-
-        public DiscoveryScrollListener(LinearLayoutManager layoutManager) {
-            super(layoutManager);
-        }
-
-        @Override
-        protected void loadMoreItems() {
-            discoverMore();
-        }
-
-        @Override
-        public int getTotalPageCount() {
-            return totalPageCount;
-        }
-
-        @Override
-        public boolean isLastPage() {
-            return pageCount >= getTotalPageCount();
-        }
-
-        @Override
-        public boolean isLoading() {
-            return isLoading;
-        }
+        discoveryAdapter.discoverMore();
     }
 }
