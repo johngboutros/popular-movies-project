@@ -12,6 +12,7 @@ import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.utilities.TMDbUtils;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -24,17 +25,17 @@ import butterknife.ButterKnife;
 public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.ViewHolder> {
 
     private Context context;
-    private List<Movie> movies;
+
+    // Discovered movies list
+    private List<Movie> movies = new ArrayList<Movie>();
 
     /**
      * Initializes the adapter with a {@link Context} and discovery movies data
      *
      * @param context typically the container activity
-     * @param movies discovery movies data
      */
-    public DiscoveryAdapter(Context context, List<Movie> movies) {
+    public DiscoveryAdapter(Context context) {
         this.context = context;
-        this.movies = movies;
     }
 
     /**
@@ -138,6 +139,23 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+        }
+    }
+
+
+    public void add(Movie movie) {
+        movies.add(movie);
+        notifyItemInserted(movies.size() - 1);
+    }
+
+    /**
+     * Adds movies to the adapter.
+     *
+     * @param movies
+     */
+    public void addAll(List<Movie> movies) {
+        for (Movie movie : movies) {
+            add(movie);
         }
     }
 }

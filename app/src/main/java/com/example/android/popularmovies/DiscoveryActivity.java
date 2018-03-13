@@ -17,9 +17,6 @@ import com.example.android.popularmovies.utilities.GsonRequest;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.utilities.TMDbUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.BindInt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,14 +33,16 @@ public class DiscoveryActivity extends AppCompatActivity {
 
     // Discovery Adapter
     private DiscoveryAdapter discoveryAdapter;
+
     // Discovery custom RecyclerView OnScrollListener
     private PaginationScrollListener scrollListener;
-    // Discovered movies list
-    private List<Movie> discoveredMovies = new ArrayList<Movie>();
+
     // Discovered pages count
     private int pageCount;
+
     // Total result pages count
     private int totalPageCount;
+
     // Loading flag
     private boolean isLoading;
 
@@ -58,8 +57,8 @@ public class DiscoveryActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(this, gridColumns);
         discoveryRecyclerView.setLayoutManager(layoutManager);
 
-        discoveryAdapter = new DiscoveryAdapter(this, discoveredMovies);
-//        discoveryRecyclerView.setAdapter(discoveryAdapter);
+        discoveryAdapter = new DiscoveryAdapter(this);
+        discoveryRecyclerView.setAdapter(discoveryAdapter);
         discoveryRecyclerView.addOnScrollListener(new DiscoveryScrollListener(layoutManager));
 
         discoverMore();
@@ -82,11 +81,9 @@ public class DiscoveryActivity extends AppCompatActivity {
                         isLoading = false;
                         Log.d(TAG, "Movie Page: " + moviePage);
 
-                        discoveredMovies.addAll(moviePage.getResults());
                         pageCount = moviePage.getPage();
                         totalPageCount = moviePage.getTotalPages();
-
-                        discoveryRecyclerView.setAdapter(discoveryAdapter);
+                        discoveryAdapter.addAll(moviePage.getResults());
 
                     }
                 },
