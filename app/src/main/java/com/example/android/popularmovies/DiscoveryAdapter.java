@@ -210,12 +210,12 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         return getItemCount() == 0;
     }
 
-    public void addLoadingFooter() {
+    public void startLoading() {
         isLoading = true;
         add(new Movie());
     }
 
-    public void removeLoadingFooter() {
+    public void stopLoading() {
         isLoading = false;
 
         int position = movies.size() - 1;
@@ -237,7 +237,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     public void discoverMore() {
 
         Integer page = pageCount > 0 ? pageCount + 1 : null;
-        isLoading = true;
+        startLoading();
 
         Request movieRequest
                 = new GsonRequest<Movie.Page>(Request.Method.GET,
@@ -248,7 +248,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
                 new Response.Listener<Movie.Page>() {
                     @Override
                     public void onResponse(Movie.Page moviePage) {
-                        isLoading = false;
+                        stopLoading();
                         Log.d(TAG, "Movie Page: " + moviePage);
 
                         pageCount = moviePage.getPage();
@@ -260,7 +260,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        isLoading = false;
+                        stopLoading();
                         Toast.makeText(context,
                                 "Couldn't load movies", Toast.LENGTH_LONG).show();
                         Log.e(TAG, "VolleyError: " + error.getMessage());

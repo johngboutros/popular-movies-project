@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="discovery_item_height" >280dp</dimen>
+    <dimen name="discovery_item_height" >277dp</dimen>
 </resources>
