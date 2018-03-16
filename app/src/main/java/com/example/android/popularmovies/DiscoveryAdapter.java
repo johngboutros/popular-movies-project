@@ -1,15 +1,18 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -50,9 +53,17 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     private boolean isLoading;
 
     /**
+     * ItemType could be used to view some items in a different way such as taking a whole row span
+     * for the loading item in a grid view.
+     */
+    private enum ItemType {
+        MOVIE, LOADING_MOVIE
+    }
+
+    /**
      * Initializes the adapter with a {@link Context} and discovery movies data
      *
-     * @param context       typically the container activity
+     * @param context typically the container activity
      */
     public DiscoveryAdapter(Context context) {
         this.context = context;
@@ -113,29 +124,41 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 
         String posterURL = TMDbUtils.buildPosterURL(posterPath, TMDbUtils.PosterSize.W185);
 
-        // FIXME BUG: Sometimes app crashes on orientation change (finalized Assets Manager?)
-        Picasso.with(context).load(posterURL)
-                .fit()
-                .centerCrop()
-                .placeholder(R.drawable.bg_movie_thumb)
-                .into(holder.image);
+        ItemType itemType = getItemType(position);
+        switch (itemType) {
+            case MOVIE:
+                // FIXME BUG: Sometimes app crashes on orientation change (finalized Assets Manager?)
+                Picasso.with(context).load(posterURL)
+                        .fit()
+                        .centerCrop()
+                        .placeholder(R.drawable.bg_movie_thumb)
+                        .into(holder.image);
 
-        // DEBUG: using Picasso.Listener to detect load failure
-        //
-//        Picasso.Builder builder = new Picasso.Builder(context);
-//        builder.listener(new Picasso.Listener() {
-//            @Override
-//            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-//                exception.printStackTrace();
-//            }
-//        });
-//
-//        builder.build().load(movies.get(position).getPosterPath())
-//                .fit()
-//                .centerCrop()
-//                .placeholder(R.drawable.bg_movie_thumb)
-//                .into(holder.image);
+                holder.loading.setVisibility(View.GONE);
+                holder.image.setVisibility(View.VISIBLE);
 
+                // DEBUG: using Picasso.Listener to detect load failure
+                //
+                //        Picasso.Builder builder = new Picasso.Builder(context);
+                //        builder.listener(new Picasso.Listener() {
+                //            @Override
+                //            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
+                //                exception.printStackTrace();
+                //            }
+                //        });
+                //
+                //        builder.build().load(movies.get(position).getPosterPath())
+                //                .fit()
+                //                .centerCrop()
+                //                .placeholder(R.drawable.bg_movie_thumb)
+                //                .into(holder.image);
+
+                break;
+            case LOADING_MOVIE:
+                holder.image.setVisibility(View.GONE);
+                holder.loading.setVisibility(View.VISIBLE);
+                break;
+        }
     }
 
     /**
@@ -155,6 +178,9 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 
         @BindView(R.id.discovery_item_image_iv)
         ImageView image;
+
+        @BindView(R.id.discovery_item_loading_pb)
+        ProgressBar loading;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -206,6 +232,8 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 
     public void startLoading() {
         isLoading = true;
+
+        // An empty movie should be viewed as a loading view
         add(new Movie());
     }
 
@@ -274,9 +302,33 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         /**
          * @param layoutManager {@link RecyclerView}'s LayoutManager
          */
-        public ScrollListener(DiscoveryAdapter adapter, LinearLayoutManager layoutManager) {
+        public ScrollListener(final DiscoveryAdapter adapter, LinearLayoutManager layoutManager) {
             super(layoutManager);
             this.adapter = adapter;
+
+            if (layoutManager instanceof GridLayoutManager) {
+                ((GridLayoutManager) layoutManager)
+                        .setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                            /**
+                             * Returns the number of span occupied by the item at <code>position</code>.
+                             *
+                             * @param position The adapter position of the item
+                             * @return The number of spans occupied by the item at the provided position
+                             */
+                            @Override
+                            public int getSpanSize(int position) {
+                                ItemType itemType = adapter.getItemType(position);
+                                switch (itemType) {
+                                    case MOVIE:
+                                        return 1;
+                                    case LOADING_MOVIE:
+                                        return adapter.context.getResources()
+                                                .getInteger(R.integer.discovery_grid_columns);
+                                }
+                                return 0;
+                            }
+                        });
+            }
         }
 
         @Override
@@ -298,5 +350,39 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         public boolean isLoading() {
             return adapter.isLoading;
         }
+    }
+
+    /**
+     * Return the view type of the item at <code>position</code> for the purposes
+     * of view recycling.
+     * <p>
+     * <p>The default implementation of this method returns 0, making the assumption of
+     * a single view type for the adapter. Unlike ListView adapters, types need not
+     * be contiguous. Consider using id resources to uniquely identify item view types.
+     *
+     * @param position position to query
+     * @return integer value identifying the type of the view needed to represent the item at
+     * <code>position</code>. Type codes need not be contiguous.
+     */
+    @Override
+    public int getItemViewType(int position) {
+
+        Movie item = getItem(position);
+
+        if (item != null) {
+            boolean noPoster = TextUtils.isEmpty(item.getPosterPath());
+            if (noPoster) {
+                return ItemType.LOADING_MOVIE.ordinal();
+            } else {
+                return ItemType.MOVIE.ordinal();
+            }
+        }
+
+        return super.getItemViewType(position);
+    }
+
+    private ItemType getItemType(int position) {
+        int itemViewType = getItemViewType(position);
+        return ItemType.values()[itemViewType];
     }
 }

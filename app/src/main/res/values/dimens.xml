@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="discovery_item_height" >277dp</dimen>
+    <dimen name="discovery_item_loading_height" >70dp</dimen>
+    <dimen name="discovery_item_loading_margin" >8dp</dimen>
 </resources>

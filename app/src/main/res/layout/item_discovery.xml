@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/discovery_item_image_iv"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/discovery_item_height"
-    android:scaleType="centerCrop">
+    android:layout_height="wrap_content">
 
-</ImageView>
+    <ImageView
+        android:id="@+id/discovery_item_image_iv"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/discovery_item_height"
+        android:scaleType="centerCrop">
+
+    </ImageView>
+
+    <ProgressBar
+        android:id="@+id/discovery_item_loading_pb"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/discovery_item_loading_height"
+        android:layout_margin="@dimen/discovery_item_loading_margin"
+
+        android:visibility="gone"/>
+</FrameLayout>
