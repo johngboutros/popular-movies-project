@@ -247,14 +247,20 @@ public class TMDbUtils {
     /**
      * Builds popular movies GET URL
      *
+     * @param page
      * @return
      */
-    public static URL buildPopularMoviesURL() {
+    public static URL buildPopularMoviesURL(Integer page) {
 
-        Uri uri = Uri.parse(API_BASE_URL + POPULAR_PATH)
+        Uri.Builder builder = Uri.parse(API_BASE_URL + POPULAR_PATH)
                 .buildUpon()
-                .appendQueryParameter(API_KEY_PARAM, API_KEY)
-                .build();
+                .appendQueryParameter(API_KEY_PARAM, API_KEY);
+
+        if (page != null && page > 0) {
+            builder.appendQueryParameter(PAGE_PARAM, page.toString());
+        }
+
+        Uri uri = builder.build();
 
         return buildUrl(uri);
     }
@@ -262,14 +268,20 @@ public class TMDbUtils {
     /**
      * Builds top rated movies GET URL
      *
+     * @param page
      * @return
      */
-    public static URL buildTopRatedMoviesURL() {
+    public static URL buildTopRatedMoviesURL(Integer page) {
 
-        Uri uri = Uri.parse(API_BASE_URL + TOP_RATED_PATH)
+        Uri.Builder builder = Uri.parse(API_BASE_URL + TOP_RATED_PATH)
                 .buildUpon()
-                .appendQueryParameter(API_KEY_PARAM, API_KEY)
-                .build();
+                .appendQueryParameter(API_KEY_PARAM, API_KEY);
+
+        if (page != null && page > 0) {
+            builder.appendQueryParameter(PAGE_PARAM, page.toString());
+        }
+
+        Uri uri = builder.build();
 
         return buildUrl(uri);
     }

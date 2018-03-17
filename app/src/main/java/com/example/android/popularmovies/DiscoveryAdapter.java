@@ -252,6 +252,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         while (getItemCount() > 0) {
             remove(getItem(0));
         }
+        pageCount = 0;
     }
 
     public boolean isEmpty() {
@@ -307,10 +308,10 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 
         switch (this.currentSortOption) {
             case POPULARITY:
-                url = TMDbUtils.buildPopularMoviesURL().toString();
+                url = TMDbUtils.buildPopularMoviesURL(page).toString();
                 break;
             case TOP_RATED:
-                url = TMDbUtils.buildTopRatedMoviesURL().toString();
+                url = TMDbUtils.buildTopRatedMoviesURL(page).toString();
                 break;
             case RELEASE_DATE:
                 url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.RELEASE_DATE, page).toString();
