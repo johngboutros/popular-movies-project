@@ -7,6 +7,8 @@ import android.widget.Switch;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by john on 04/03/18.
@@ -70,6 +72,7 @@ public class TMDbUtils {
     // Discover params
     private static final String LANGUAGE_PARAM = "language";
     private static final String SORT_BY_PARAM = "sort_by";
+    private static final String RELEASE_DATE_LTE_PARAM = "release_date.lte";
 
     // Allowed SORT_BY Values:
     // popularity.asc, popularity.desc, release_date.asc, release_date.desc, revenue.asc,
@@ -170,6 +173,11 @@ public class TMDbUtils {
 
         if (page != null && page > 0) {
             builder.appendQueryParameter(PAGE_PARAM, page.toString());
+        }
+
+        if (sortBy == SortBy.RELEASE_DATE) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            builder.appendQueryParameter(RELEASE_DATE_LTE_PARAM, dateFormat.format(new Date()));
         }
 
         Uri uri = builder.build();
