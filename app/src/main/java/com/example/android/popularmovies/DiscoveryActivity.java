@@ -8,6 +8,9 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.example.android.popularmovies.data.Movie;
 
 import butterknife.BindInt;
 import butterknife.BindString;
@@ -64,8 +67,20 @@ public class DiscoveryActivity extends AppCompatActivity {
 
         discoveryAdapter = new DiscoveryAdapter(this);
         discoveryRecyclerView.setAdapter(discoveryAdapter);
+
+        // TODO add/remove on start/stop
+        // TODO Move to Adapter.onAttachRecyclerView()
         discoveryRecyclerView.addOnScrollListener(
                 new DiscoveryAdapter.ScrollListener(discoveryAdapter, layoutManager));
+
+        // TODO add/remove on start/stop
+        discoveryAdapter.addMovieClickListener(new DiscoveryAdapter.MovieClickListener() {
+            @Override
+            public void onMovieClicked(Movie movie) {
+                Toast.makeText(DiscoveryActivity.this, movie.getTitle(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
 
         loadSortPreferences();
     }
@@ -150,7 +165,7 @@ public class DiscoveryActivity extends AppCompatActivity {
                 PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(sortPrefKey, getString(preferenceId));
-        editor.commit();
+        editor.apply();
 
     }
 

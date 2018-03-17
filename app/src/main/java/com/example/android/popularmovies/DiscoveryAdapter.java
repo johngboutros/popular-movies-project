@@ -57,6 +57,9 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     // Current SortOption
     private SortOption currentSortOption = SortOption.POPULARITY;
 
+    // Registered Movie Click Listeners
+    private List<MovieClickListener> movieClickListeners = new ArrayList<MovieClickListener>();
+
     /**
      * ItemType could be used to view some items in a different way such as taking a whole row span
      * for the loading item in a grid view.
@@ -132,7 +135,9 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     @Override
     public void onBindViewHolder(DiscoveryAdapter.ViewHolder holder, int position) {
 
-        String posterPath = movies.get(position).getPosterPath();
+        final Movie movie = movies.get(position);
+
+        String posterPath = movie.getPosterPath();
 
         String posterURL = TMDbUtils.buildPosterURL(posterPath, TMDbUtils.PosterSize.W185);
 
@@ -145,9 +150,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
                         .centerCrop()
                         .placeholder(R.drawable.bg_movie_thumb)
                         .into(holder.image);
-
-                holder.loading.setVisibility(View.GONE);
-                holder.image.setVisibility(View.VISIBLE);
 
                 // DEBUG: using Picasso.Listener to detect load failure
                 //
@@ -164,6 +166,20 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
                 //                .centerCrop()
                 //                .placeholder(R.drawable.bg_movie_thumb)
                 //                .into(holder.image);
+
+                holder.loading.setVisibility(View.GONE);
+                holder.image.setVisibility(View.VISIBLE);
+
+                holder.image.setContentDescription(movie.getTitle());
+
+                holder.image.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        for (MovieClickListener listener : movieClickListeners) {
+                            listener.onMovieClicked(movie);
+                        }
+                    }
+                });
 
                 break;
             case LOADING_MOVIE:
@@ -347,6 +363,9 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         private final DiscoveryAdapter adapter;
 
         /**
+         * Initializes a new ScrollListener with an Adapter and a LayoutManager
+         *
+         * @param adapter {@link DiscoveryAdapter}
          * @param layoutManager {@link RecyclerView}'s LayoutManager
          */
         public ScrollListener(final DiscoveryAdapter adapter, LinearLayoutManager layoutManager) {
@@ -432,4 +451,36 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         int itemViewType = getItemViewType(position);
         return ItemType.values()[itemViewType];
     }
+
+    /**
+     * Movie Click Listener.
+     */
+    public static interface MovieClickListener {
+        /**
+         * To be implemented for desired behavior when a movie clicked.
+         *
+         * @param movie clicked movie
+         */
+        public void onMovieClicked(Movie movie);
+    }
+
+    /**
+     * Registers a MovieClickListener
+     *
+     * @param listener
+     */
+    public void addMovieClickListener(MovieClickListener listener) {
+        movieClickListeners.add(listener);
+    }
+
+    /**
+     * Unregisters a MovieClickListener
+     *
+     * @param listener
+     */
+    public void removeMovieClickListener(MovieClickListener listener) {
+        movieClickListeners.remove(listener);
+    }
+
+
 }
