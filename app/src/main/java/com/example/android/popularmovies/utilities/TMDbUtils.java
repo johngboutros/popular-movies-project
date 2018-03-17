@@ -201,7 +201,6 @@ public class TMDbUtils {
      * @return
      */
     public static String buildPosterURL(@NonNull String posterPath, @NonNull PosterSize posterSize) {
-        String baseUrl = POSTER_BASE_URL;
         String sizeSegment = null;
 
         switch (posterSize) {
@@ -230,12 +229,43 @@ public class TMDbUtils {
                 sizeSegment = POSTER_SIZE_W185;
         }
 
-        String posterUrl = baseUrl + sizeSegment + posterPath;
+        String posterUrl = POSTER_BASE_URL + sizeSegment + posterPath;
 
         Log.d(TAG,"Poster URL built: " + posterUrl);
 
         return posterUrl;
     }
+
+    /**
+     * Builds popular movies GET URL
+     *
+     * @return
+     */
+    public static URL buildPopularMoviesURL() {
+
+        Uri uri = Uri.parse(API_BASE_URL + POPULAR_PATH)
+                .buildUpon()
+                .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                .build();
+
+        return buildUrl(uri);
+    }
+
+    /**
+     * Builds top rated movies GET URL
+     *
+     * @return
+     */
+    public static URL buildTopRatedMoviesURL() {
+
+        Uri uri = Uri.parse(API_BASE_URL + TOP_RATED_PATH)
+                .buildUpon()
+                .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                .build();
+
+        return buildUrl(uri);
+    }
+
 
     /**
      * Builds a URL for a given URI.

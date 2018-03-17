@@ -1,6 +1,8 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -52,12 +54,22 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     // Loading flag
     private boolean isLoading;
 
+    // Current SortOption
+    private SortOption currentSortOption = SortOption.POPULARITY;
+
     /**
      * ItemType could be used to view some items in a different way such as taking a whole row span
      * for the loading item in a grid view.
      */
     private enum ItemType {
         MOVIE, LOADING_MOVIE
+    }
+
+    /**
+     * Available sort options provided by the adapter
+     */
+    public enum SortOption {
+        POPULARITY, TOP_RATED, RELEASE_DATE, REVENUE
     }
 
     /**
@@ -254,16 +266,51 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     }
 
     /**
-     * Loads more movies.
+     * Loads more movies using the current sort option.
      */
     public void discoverMore() {
+        discoverMore(null);
+    }
+
+    /**
+     * Loads more movies using the provided sort option.
+     *
+     * @param sortOption
+     */
+    public void discoverMore(SortOption sortOption) {
+
+        if (sortOption != null && !currentSortOption.equals(sortOption)) {
+            this.currentSortOption = sortOption;
+            if (isLoading) stopLoading();
+            clear();
+        }
 
         Integer page = pageCount > 0 ? pageCount + 1 : null;
+
+        String url = null;
+
+        switch (this.currentSortOption) {
+            case POPULARITY:
+                url = TMDbUtils.buildPopularMoviesURL().toString();
+                break;
+            case TOP_RATED:
+                url = TMDbUtils.buildTopRatedMoviesURL().toString();
+                break;
+            case RELEASE_DATE:
+                url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.RELEASE_DATE, page).toString();
+                break;
+            case REVENUE:
+                url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.REVENUE, page).toString();
+                break;
+            default:
+                url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.POPULARITY, page).toString();
+        }
+
         startLoading();
 
         Request movieRequest
                 = new GsonRequest<Movie.Page>(Request.Method.GET,
-                TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.POPULARITY, page).toString(),
+                url,
                 null,
                 Movie.Page.class,
                 null,
@@ -370,8 +417,8 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         Movie item = getItem(position);
 
         if (item != null) {
-            boolean noPoster = TextUtils.isEmpty(item.getPosterPath());
-            if (noPoster) {
+            boolean noId = item.getId() == null;
+            if (noId) {
                 return ItemType.LOADING_MOVIE.ordinal();
             } else {
                 return ItemType.MOVIE.ordinal();
