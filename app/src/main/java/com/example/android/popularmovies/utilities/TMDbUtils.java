@@ -7,6 +7,7 @@ import android.widget.Switch;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -73,6 +74,10 @@ public class TMDbUtils {
     private static final String LANGUAGE_PARAM = "language";
     private static final String SORT_BY_PARAM = "sort_by";
     private static final String RELEASE_DATE_LTE_PARAM = "release_date.lte";
+
+    // Date Format
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
     // Allowed SORT_BY Values:
     // popularity.asc, popularity.desc, release_date.asc, release_date.desc, revenue.asc,
@@ -176,8 +181,7 @@ public class TMDbUtils {
         }
 
         if (sortBy == SortBy.RELEASE_DATE) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            builder.appendQueryParameter(RELEASE_DATE_LTE_PARAM, dateFormat.format(new Date()));
+            builder.appendQueryParameter(RELEASE_DATE_LTE_PARAM, formatDate(new Date()));
         }
 
         Uri uri = builder.build();
@@ -239,7 +243,7 @@ public class TMDbUtils {
 
         String posterUrl = POSTER_BASE_URL + sizeSegment + posterPath;
 
-        Log.d(TAG,"Poster URL built: " + posterUrl);
+        Log.d(TAG, "Poster URL built: " + posterUrl);
 
         return posterUrl;
     }
@@ -305,4 +309,29 @@ public class TMDbUtils {
         }
     }
 
+    /**
+     * Formats a date object to the format used by TMDb
+     *
+     * @param date
+     * @return formatted date
+     */
+    public static String formatDate(Date date) {
+        return dateFormat.format(date);
+    }
+
+
+    /**
+     * Parses a formatted date string
+     *
+     * @param date
+     * @return parsed date
+     */
+    public static Date parseDate(String date) {
+        try {
+            return dateFormat.parse(date);
+        } catch (ParseException e) {
+            Log.e(TAG, "parseDate Error: " + e.getMessage());
+        }
+        return null;
+    }
 }

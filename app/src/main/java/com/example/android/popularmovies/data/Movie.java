@@ -2,13 +2,14 @@ package com.example.android.popularmovies.data;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by john on 03/03/18.
  */
 
-public class Movie {
+public class Movie implements Serializable {
 
     //  poster_path         string or null      optional
     //  adult               boolean             optional

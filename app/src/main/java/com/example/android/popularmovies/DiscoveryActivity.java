@@ -1,5 +1,6 @@
 package com.example.android.popularmovies;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -69,7 +70,7 @@ public class DiscoveryActivity extends AppCompatActivity {
         discoveryRecyclerView.setAdapter(discoveryAdapter);
 
         // TODO add/remove on start/stop
-        // TODO Move to Adapter.onAttachRecyclerView()
+        // TODO Move to Adapter.onAttachRecyclerView()?
         discoveryRecyclerView.addOnScrollListener(
                 new DiscoveryAdapter.ScrollListener(discoveryAdapter, layoutManager));
 
@@ -77,8 +78,14 @@ public class DiscoveryActivity extends AppCompatActivity {
         discoveryAdapter.addMovieClickListener(new DiscoveryAdapter.MovieClickListener() {
             @Override
             public void onMovieClicked(Movie movie) {
-                Toast.makeText(DiscoveryActivity.this, movie.getTitle(),
-                        Toast.LENGTH_SHORT).show();
+                // TODO launch MovieDetails Avtivity
+//                Toast.makeText(DiscoveryActivity.this, movie.getTitle(),
+//                        Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(DiscoveryActivity.this,
+                        MovieDetailsActivity.class);
+                intent.putExtra(MovieDetailsActivity.MOVIE_EXTRA_PARAM, movie);
+
+                startActivity(intent);
             }
         });
 

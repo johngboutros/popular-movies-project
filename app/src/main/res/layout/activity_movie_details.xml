@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.example.android.popularmovies.MovieDetailsActivity">
+
+        <ImageView
+            android:id="@+id/movie_detail_image_iv"
+            android:layout_width="@dimen/movie_detail_image_width"
+            android:layout_height="@dimen/movie_detail_image_height"
+            android:layout_marginLeft="@dimen/movie_detail_image_margin_left"
+            android:layout_marginStart="@dimen/movie_detail_image_margin_left"
+            android:layout_marginTop="@dimen/movie_detail_image_margin_top"
+            android:scaleType="centerCrop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </ImageView>
+
+        <TextView
+            android:id="@+id/movie_detail_year_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/movie_detail_margin_left"
+            android:layout_marginStart="@dimen/movie_detail_margin_left"
+            android:layout_marginTop="@dimen/movie_detail_margin_top"
+            android:textSize="@dimen/movie_detail_year_text_size"
+            app:layout_constraintStart_toEndOf="@+id/movie_detail_image_iv"
+            app:layout_constraintTop_toTopOf="@+id/movie_detail_image_iv"
+            tools:text="2015" />
+
+        <!--<TextView-->
+        <!--android:id="@+id/movie_detail_duration_tv"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="@dimen/movie_detail_margin_top"-->
+        <!--android:textSize="@dimen/movie_detail_duration_text_size"-->
+        <!--android:textStyle="italic|bold"-->
+        <!--app:layout_constraintStart_toStartOf="@+id/movie_detail_year_tv"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/movie_detail_year_tv"-->
+        <!--tools:text="120min" />-->
+
+        <TextView
+            android:id="@+id/movie_detail_rate_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/movie_detail_margin_top"
+            android:textSize="@dimen/movie_detail_rate_text_size"
+            app:layout_constraintStart_toStartOf="@+id/movie_detail_year_tv"
+            app:layout_constraintTop_toBottomOf="@+id/movie_detail_year_tv"
+            tools:text="8.1/10" />
+
+        <TextView
+            android:id="@+id/movie_detail_overview_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/movie_detail_overview_margin_h"
+            android:layout_marginStart="@dimen/movie_detail_overview_margin_h"
+            android:layout_marginTop="@dimen/movie_detail_margin_top"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/movie_detail_image_iv"
+            tools:text="@tools:sample/lorem/random" />
+
+    </android.support.constraint.ConstraintLayout>
+
+</ScrollView>
