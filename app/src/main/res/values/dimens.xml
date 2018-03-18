@@ -11,6 +11,6 @@
     <dimen name="movie_detail_margin_top">16dp</dimen>
     <dimen name="movie_detail_year_text_size">28sp</dimen>
     <dimen name="movie_detail_duration_text_size">22sp</dimen>
-    <dimen name="movie_detail_rate_text_size">16sp</dimen>
+    <dimen name="movie_detail_paragraph_text_size">16sp</dimen>
     <dimen name="movie_detail_overview_margin_h">16dp</dimen>
 </resources>

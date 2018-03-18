@@ -51,7 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/movie_detail_margin_top"
-            android:textSize="@dimen/movie_detail_rate_text_size"
+            android:textSize="@dimen/movie_detail_paragraph_text_size"
             app:layout_constraintStart_toStartOf="@+id/movie_detail_year_tv"
             app:layout_constraintTop_toBottomOf="@+id/movie_detail_year_tv"
             tools:text="8.1/10" />
@@ -63,6 +63,7 @@
             android:layout_marginEnd="@dimen/movie_detail_overview_margin_h"
             android:layout_marginStart="@dimen/movie_detail_overview_margin_h"
             android:layout_marginTop="@dimen/movie_detail_margin_top"
+            android:textSize="@dimen/movie_detail_paragraph_text_size"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/movie_detail_image_iv"
