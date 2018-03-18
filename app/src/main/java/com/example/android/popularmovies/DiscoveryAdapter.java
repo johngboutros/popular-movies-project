@@ -1,13 +1,11 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +40,9 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     private static final String TAG = DiscoveryAdapter.class.getSimpleName();
     private final Context context;
 
+    // RecyclerView's LayoutManager
+    private final LinearLayoutManager layoutManager;
+
     // Discovered movies list
     private List<Movie> movies = new ArrayList<Movie>();
 
@@ -59,6 +60,9 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 
     // Registered Movie Click Listeners
     private List<MovieClickListener> movieClickListeners = new ArrayList<MovieClickListener>();
+
+    // Scroll listener
+    private ScrollListener scrollListener;
 
     /**
      * ItemType could be used to view some items in a different way such as taking a whole row span
@@ -78,10 +82,12 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     /**
      * Initializes the adapter with a {@link Context} and discovery movies data
      *
-     * @param context typically the container activity
+     * @param context       typically the container activity
+     * @param layoutManager {@link RecyclerView}'s LayoutManager
      */
-    public DiscoveryAdapter(Context context) {
+    public DiscoveryAdapter(Context context, LinearLayoutManager layoutManager) {
         this.context = context;
+        this.layoutManager = layoutManager;
     }
 
     /**
@@ -359,19 +365,15 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     /**
      * Custom Pagination {@link OnScrollListener} instance to be set to the {@link RecyclerView}.
      */
-    public static class ScrollListener extends PaginationScrollListener {
-
-        private final DiscoveryAdapter adapter;
+    private class ScrollListener extends PaginationScrollListener {
 
         /**
          * Initializes a new ScrollListener with an Adapter and a LayoutManager
          *
-         * @param adapter {@link DiscoveryAdapter}
          * @param layoutManager {@link RecyclerView}'s LayoutManager
          */
-        public ScrollListener(final DiscoveryAdapter adapter, LinearLayoutManager layoutManager) {
+        public ScrollListener(LinearLayoutManager layoutManager) {
             super(layoutManager);
-            this.adapter = adapter;
 
             if (layoutManager instanceof GridLayoutManager) {
                 ((GridLayoutManager) layoutManager)
@@ -384,12 +386,12 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
                              */
                             @Override
                             public int getSpanSize(int position) {
-                                ItemType itemType = adapter.getItemType(position);
+                                ItemType itemType = getItemType(position);
                                 switch (itemType) {
                                     case MOVIE:
                                         return 1;
                                     case LOADING_MOVIE:
-                                        return adapter.context.getResources()
+                                        return context.getResources()
                                                 .getInteger(R.integer.discovery_grid_columns);
                                 }
                                 return 0;
@@ -400,22 +402,58 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 
         @Override
         protected void loadMoreItems() {
-            adapter.discoverMore();
+            discoverMore();
         }
 
         @Override
         public int getTotalPageCount() {
-            return adapter.totalPageCount;
+            return totalPageCount;
         }
 
         @Override
         public boolean isLastPage() {
-            return adapter.pageCount >= getTotalPageCount();
+            return pageCount >= getTotalPageCount();
         }
 
         @Override
         public boolean isLoading() {
-            return adapter.isLoading;
+            return isLoading;
+        }
+    }
+
+    /**
+     * Called by RecyclerView when it starts observing this Adapter.
+     * <p>
+     * Keep in mind that same adapter may be observed by multiple RecyclerViews.
+     *
+     * @param recyclerView The RecyclerView instance which started observing this adapter.
+     * @see #onDetachedFromRecyclerView(RecyclerView)
+     */
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+
+        // This implementation assumes that only 1 RecyclerView observes this adapter
+        if (scrollListener == null) {
+            scrollListener = new ScrollListener(layoutManager);
+        }
+
+        recyclerView.addOnScrollListener(scrollListener);
+    }
+
+    /**
+     * Called by RecyclerView when it stops observing this Adapter.
+     *
+     * @param recyclerView The RecyclerView instance which stopped observing this adapter.
+     * @see #onAttachedToRecyclerView(RecyclerView)
+     */
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+
+        if (scrollListener != null) {
+            recyclerView.removeOnScrollListener(scrollListener);
+            scrollListener = null;
         }
     }
 

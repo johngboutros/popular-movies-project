@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.android.popularmovies.DiscoveryAdapter.MovieClickListener;
 import com.example.android.popularmovies.data.Movie;
 
 import butterknife.BindInt;
@@ -55,6 +56,9 @@ public class DiscoveryActivity extends AppCompatActivity {
     // Discovery Adapter
     private DiscoveryAdapter discoveryAdapter;
 
+    // MovieClickListener
+    private MovieClickListener movieClickListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,30 +70,38 @@ public class DiscoveryActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(this, gridColumns);
         discoveryRecyclerView.setLayoutManager(layoutManager);
 
-        discoveryAdapter = new DiscoveryAdapter(this);
+        discoveryAdapter = new DiscoveryAdapter(this, layoutManager);
         discoveryRecyclerView.setAdapter(discoveryAdapter);
 
-        // TODO add/remove on start/stop
-        // TODO Move to Adapter.onAttachRecyclerView()?
-        discoveryRecyclerView.addOnScrollListener(
-                new DiscoveryAdapter.ScrollListener(discoveryAdapter, layoutManager));
-
-        // TODO add/remove on start/stop
-        discoveryAdapter.addMovieClickListener(new DiscoveryAdapter.MovieClickListener() {
-            @Override
-            public void onMovieClicked(Movie movie) {
-                // TODO launch MovieDetails Avtivity
-//                Toast.makeText(DiscoveryActivity.this, movie.getTitle(),
-//                        Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(DiscoveryActivity.this,
-                        MovieDetailsActivity.class);
-                intent.putExtra(MovieDetailsActivity.MOVIE_EXTRA_PARAM, movie);
-
-                startActivity(intent);
-            }
-        });
-
         loadSortPreferences();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (movieClickListener == null) {
+            movieClickListener = new MovieClickListener() {
+                @Override
+                public void onMovieClicked(Movie movie) {
+                    // launch MovieDetails Activity
+                    Intent intent = new Intent(DiscoveryActivity.this,
+                            MovieDetailsActivity.class);
+                    intent.putExtra(MovieDetailsActivity.MOVIE_EXTRA_PARAM, movie);
+
+                    startActivity(intent);
+                }
+            };
+            discoveryAdapter.addMovieClickListener(movieClickListener);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (movieClickListener != null) {
+            discoveryAdapter.removeMovieClickListener(movieClickListener);
+            movieClickListener = null;
+        }
     }
 
     /**
