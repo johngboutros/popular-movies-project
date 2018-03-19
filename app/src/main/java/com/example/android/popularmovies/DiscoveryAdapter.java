@@ -155,6 +155,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         switch (itemType) {
             case MOVIE:
                 // FIXME BUG: Sometimes app crashes on orientation change (finalized Assets Manager?)
+                // FIXME BUG: R.drawable.bg_movie_thumb: resource not found when tested on real device
                 Picasso.with(context).load(posterURL)
                         .fit()
                         .centerCrop()
@@ -258,7 +259,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     }
 
     public void clear() {
-        isLoading = false;
+        stopLoading();
         while (getItemCount() > 0) {
             remove(getItem(0));
         }
@@ -270,6 +271,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     }
 
     public void startLoading() {
+        if (isLoading) return;
         isLoading = true;
 
         // An empty movie should be viewed as a loading view
@@ -277,6 +279,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     }
 
     public void stopLoading() {
+        if (!isLoading) return;
         isLoading = false;
 
         int position = movies.size() - 1;
@@ -308,7 +311,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 
         if (sortOption != null && !currentSortOption.equals(sortOption)) {
             this.currentSortOption = sortOption;
-            if (isLoading) stopLoading();
             clear();
         }
 
@@ -333,7 +335,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
                 url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.POPULARITY, page).toString();
         }
 
-        // FIXME Fast scrolling causes a new loading starts without stopping the current one
         startLoading();
 
         Request movieRequest
@@ -538,6 +539,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         state.pageCount = pageCount;
         state.totalPageCount = totalPageCount;
         state.isLoading = isLoading;
+        state.currentSortOption = currentSortOption;
 
         return Parcels.wrap(state);
     }
@@ -555,6 +557,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         this.pageCount = state.pageCount;
         this.totalPageCount = state.totalPageCount;
         this.isLoading = state.isLoading;
+        this.currentSortOption = state.currentSortOption;
     }
 
     /**
@@ -570,5 +573,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         int totalPageCount;
         // Loading flag
         boolean isLoading;
+        // Current SortOption
+        SortOption currentSortOption;
     }
 }

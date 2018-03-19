@@ -57,6 +57,7 @@ public class DiscoveryActivity extends AppCompatActivity {
     // Saved instance state Bundle keys
     private final static String LAYOUT_STATE_BUNDLE_KEY = "layout_state";
     private final static String ADAPTER_STATE_BUNDLE_KEY = "adapter_state";
+    private final static String TITLE_BUNDLE_KEY = "title";
 
     // Discovery Adapter
     private DiscoveryAdapter discoveryAdapter;
@@ -83,8 +84,11 @@ public class DiscoveryActivity extends AppCompatActivity {
         } else {
             Parcelable adapterState = savedInstanceState.getParcelable(ADAPTER_STATE_BUNDLE_KEY);
             Parcelable layoutState = savedInstanceState.getParcelable(LAYOUT_STATE_BUNDLE_KEY);
+            String title = savedInstanceState.getString(TITLE_BUNDLE_KEY);
+
             discoveryAdapter.restoreInstanceState(adapterState);
             discoveryRecyclerView.getLayoutManager().onRestoreInstanceState(layoutState);
+            setTitle(title);
         }
     }
 
@@ -230,5 +234,6 @@ public class DiscoveryActivity extends AppCompatActivity {
 
         outState.putParcelable(ADAPTER_STATE_BUNDLE_KEY, adapterState);
         outState.putParcelable(LAYOUT_STATE_BUNDLE_KEY, layoutState);
+        outState.putString(TITLE_BUNDLE_KEY, String.valueOf(getTitle()));
     }
 }

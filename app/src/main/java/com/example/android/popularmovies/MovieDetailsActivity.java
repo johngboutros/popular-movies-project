@@ -1,7 +1,7 @@
 package com.example.android.popularmovies;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,7 +11,6 @@ import com.squareup.picasso.Picasso;
 
 import org.parceler.Parcels;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 
 import butterknife.BindString;
@@ -59,6 +58,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         String posterURL = TMDbUtils.buildPosterURL(movie.getPosterPath(), TMDbUtils.PosterSize.W185);
 
+        // FIXME BUG: R.drawable.bg_movie_thumb: resource not found when tested on real device
         Picasso.with(this).load(posterURL)
                 .fit()
                 .centerCrop()
