@@ -3,18 +3,17 @@ package com.example.android.popularmovies;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.example.android.popularmovies.DiscoveryAdapter.MovieClickListener;
 import com.example.android.popularmovies.data.Movie;
 
-import org.parceler.Parcel;
 import org.parceler.Parcels;
 
 import butterknife.BindInt;
@@ -55,6 +54,9 @@ public class DiscoveryActivity extends AppCompatActivity {
     @BindString(R.string.pref_discovery_sort_default)
     String sortPrefDefault;
 
+    // Saved instance state Bundle keys
+    private final static String LAYOUT_STATE_BUNDLE_KEY = "layout_state";
+    private final static String ADAPTER_STATE_BUNDLE_KEY = "adapter_state";
 
     // Discovery Adapter
     private DiscoveryAdapter discoveryAdapter;
@@ -76,7 +78,14 @@ public class DiscoveryActivity extends AppCompatActivity {
         discoveryAdapter = new DiscoveryAdapter(this, layoutManager);
         discoveryRecyclerView.setAdapter(discoveryAdapter);
 
-        loadSortPreferences();
+        if (savedInstanceState == null) {
+            loadSortPreferences();
+        } else {
+            Parcelable adapterState = savedInstanceState.getParcelable(ADAPTER_STATE_BUNDLE_KEY);
+            Parcelable layoutState = savedInstanceState.getParcelable(LAYOUT_STATE_BUNDLE_KEY);
+            discoveryAdapter.restoreInstanceState(adapterState);
+            discoveryRecyclerView.getLayoutManager().onRestoreInstanceState(layoutState);
+        }
     }
 
     @Override
@@ -210,5 +219,16 @@ public class DiscoveryActivity extends AppCompatActivity {
             discoveryAdapter.discoverMore(DiscoveryAdapter.SortOption.REVENUE);
         }
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Parcelable adapterState = discoveryAdapter.saveInstanceState();
+        Parcelable layoutState = discoveryRecyclerView.getLayoutManager().onSaveInstanceState();
+
+        outState.putParcelable(ADAPTER_STATE_BUNDLE_KEY, adapterState);
+        outState.putParcelable(LAYOUT_STATE_BUNDLE_KEY, layoutState);
     }
 }
