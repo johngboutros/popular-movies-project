@@ -2,14 +2,16 @@ package com.example.android.popularmovies.data;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.parceler.Parcel;
+
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by john on 03/03/18.
  */
-
-public class Movie implements Serializable {
+@Parcel
+public class Movie  {
 
     //  poster_path         string or null      optional
     //  adult               boolean             optional
@@ -31,29 +33,30 @@ public class Movie implements Serializable {
     //  vote_average        number              optional
 
     @SerializedName("poster_path")
-    private String posterPath;
-    private boolean adult;
-    private String overview;
+    String posterPath;
+    boolean adult;
+    String overview;
     @SerializedName("release_date")
-    private String releaseDate;
+    String releaseDate;
     @SerializedName("genre_ids")
-    private List<Integer> genreIds;
-    private List<Genre> genres;
-    private Integer id;
+    List<Integer> genreIds;
+    List<Genre> genres;
+    Integer id;
     @SerializedName("original_title")
-    private String originalTitle;
+    String originalTitle;
     @SerializedName("original_language")
-    private String originalLanguage;
-    private String title;
+    String originalLanguage;
+    String title;
     @SerializedName("backdrop_path")
-    private String backdropPath;
-    private float popularity;
+    String backdropPath;
+    float popularity;
     @SerializedName("vote_count")
-    private Integer voteCount;
-    private boolean video;
+    Integer voteCount;
+    boolean video;
     @SerializedName("vote_average")
-    private float voteAverage;
+    float voteAverage;
 
+    @Parcel
     public static class Genre {
         private Integer id;
         private String name;

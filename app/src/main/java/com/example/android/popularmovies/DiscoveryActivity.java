@@ -14,6 +14,9 @@ import android.widget.Toast;
 import com.example.android.popularmovies.DiscoveryAdapter.MovieClickListener;
 import com.example.android.popularmovies.data.Movie;
 
+import org.parceler.Parcel;
+import org.parceler.Parcels;
+
 import butterknife.BindInt;
 import butterknife.BindString;
 import butterknife.BindView;
@@ -86,7 +89,7 @@ public class DiscoveryActivity extends AppCompatActivity {
                     // launch MovieDetails Activity
                     Intent intent = new Intent(DiscoveryActivity.this,
                             MovieDetailsActivity.class);
-                    intent.putExtra(MovieDetailsActivity.MOVIE_EXTRA_PARAM, movie);
+                    intent.putExtra(MovieDetailsActivity.MOVIE_EXTRA_PARAM, Parcels.wrap(movie));
 
                     startActivity(intent);
                 }

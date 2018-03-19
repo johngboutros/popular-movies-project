@@ -9,6 +9,8 @@ import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.utilities.TMDbUtils;
 import com.squareup.picasso.Picasso;
 
+import org.parceler.Parcels;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 
@@ -51,7 +53,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_details);
         ButterKnife.bind(this);
 
-        Movie movie = (Movie) getIntent().getSerializableExtra(MOVIE_EXTRA_PARAM);
+        Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
 
         setTitle(movie.getTitle());
 
