@@ -58,7 +58,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         String posterURL = TMDbUtils.buildPosterURL(movie.getPosterPath(), TMDbUtils.PosterSize.W185);
 
-        // FIXME BUG: R.drawable.bg_movie_thumb: resource not found when tested on real device
         Picasso.with(this).load(posterURL)
                 .fit()
                 .centerCrop()

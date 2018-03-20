@@ -154,8 +154,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         ItemType itemType = getItemType(position);
         switch (itemType) {
             case MOVIE:
-                // FIXME BUG: Sometimes app crashes on orientation change (finalized Assets Manager?)
-                // FIXME BUG: R.drawable.bg_movie_thumb: resource not found when tested on real device
                 Picasso.with(context).load(posterURL)
                         .fit()
                         .centerCrop()
