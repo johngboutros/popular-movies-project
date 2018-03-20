@@ -15,8 +15,21 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            // Secret properties
+            applicationVariants.all { variant ->
+                variant.buildConfigField "String", "TMDB_API_KEY", "\""+secretProps()['TMDB_API_KEY']+"\""
+            }
         }
     }
+}
+
+// Secret properties
+// TO-DO Use Firebase RemoteConfig instead.
+def secretProps(){
+    def Properties props = new Properties()
+    props.load(new FileInputStream(new File('secret.properties')))
+    return props
 }
 
 dependencies {

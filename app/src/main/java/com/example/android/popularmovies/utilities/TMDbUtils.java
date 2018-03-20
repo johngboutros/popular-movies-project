@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Switch;
 
+import com.example.android.popularmovies.BuildConfig;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
@@ -22,7 +24,7 @@ public class TMDbUtils {
     private static final String TAG = TMDbUtils.class.getSimpleName();
 
     // API Key (v3 auth)
-    private static final String API_KEY = "<YOUR_API_KEY>";
+    private static final String API_KEY = BuildConfig.TMDB_API_KEY;
 
     // API base URL
     private static final String API_BASE_URL = "http://api.themoviedb.org/3";
