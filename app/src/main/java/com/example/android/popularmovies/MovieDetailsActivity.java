@@ -2,6 +2,7 @@ package com.example.android.popularmovies;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -56,20 +57,34 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         setTitle(movie.getTitle());
 
-        String posterURL = TMDbUtils.buildPosterURL(movie.getPosterPath(), TMDbUtils.PosterSize.W185);
+        if (TextUtils.isEmpty(movie.getPosterPath())) {
 
-        Picasso.with(this).load(posterURL)
-                .fit()
-                .centerCrop()
-                .placeholder(R.drawable.bg_movie_thumb)
-                .into(imageDisplay);
+            imageDisplay.setImageDrawable(getResources().getDrawable(R.drawable.bg_movie_thumb));
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat(YEAR_FORMAT);
+        } else {
 
-        yearDisplay.setText(dateFormat.format(TMDbUtils.parseDate(movie.getReleaseDate())));
+            String posterURL = TMDbUtils.buildPosterURL(movie.getPosterPath(), TMDbUtils.PosterSize.W185);
 
-        rateDisplay.setText(String.format(rateFormat, movie.getVoteAverage()));
+            Picasso.with(this).load(posterURL)
+                    .fit()
+                    .centerCrop()
+                    .placeholder(R.drawable.bg_movie_thumb)
+                    .into(imageDisplay);
+        }
 
-        overviewDisplay.setText(movie.getOverview());
+        if (!TextUtils.isEmpty(movie.getReleaseDate())) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat(YEAR_FORMAT);
+            yearDisplay.setText(dateFormat.format(TMDbUtils.parseDate(movie.getReleaseDate())));
+        }
+
+        if (movie.getVoteAverage() > 0) {
+            rateDisplay.setText(String.format(rateFormat, movie.getVoteAverage()));
+        } else {
+            rateDisplay.setText(R.string.movie_detail_unrated);
+        }
+
+        if (!TextUtils.isEmpty(movie.getOverview())) {
+            overviewDisplay.setText(movie.getOverview());
+        }
     }
 }
