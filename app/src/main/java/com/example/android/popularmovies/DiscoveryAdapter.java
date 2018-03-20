@@ -7,6 +7,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -149,37 +151,58 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 
         String posterPath = movie.getPosterPath();
 
-        String posterURL = TMDbUtils.buildPosterURL(posterPath, TMDbUtils.PosterSize.W185);
 
         ItemType itemType = getItemType(position);
         switch (itemType) {
             case MOVIE:
-                Picasso.with(context).load(posterURL)
-                        .fit()
-                        .centerCrop()
-                        .placeholder(R.drawable.bg_movie_thumb)
-                        .into(holder.image);
 
-                // DEBUG: using Picasso.Listener to detect load failure
-                //
-                //        Picasso.Builder builder = new Picasso.Builder(context);
-                //        builder.listener(new Picasso.Listener() {
-                //            @Override
-                //            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-                //                exception.printStackTrace();
-                //            }
-                //        });
-                //
-                //        builder.build().load(movies.get(position).getPosterPath())
-                //                .fit()
-                //                .centerCrop()
-                //                .placeholder(R.drawable.bg_movie_thumb)
-                //                .into(holder.image);
+                String title = movie.getTitle();
 
-                holder.loading.setVisibility(View.GONE);
-                holder.image.setVisibility(View.VISIBLE);
+                if (TextUtils.isEmpty(title)) {
+                    title = "UNTITLED";
+                }
 
-                holder.image.setContentDescription(movie.getTitle());
+                if (TextUtils.isEmpty(movie.getPosterPath())) {
+
+                    holder.title.setText(title);
+                    holder.image.setImageDrawable(context.getResources()
+                            .getDrawable(R.drawable.bg_movie_thumb));
+
+                    holder.loading.setVisibility(View.GONE);
+                    holder.image.setVisibility(View.VISIBLE);
+                    holder.title.setVisibility(View.VISIBLE);
+
+                } else {
+                    String posterURL = TMDbUtils.buildPosterURL(posterPath, TMDbUtils.PosterSize.W185);
+
+                    Picasso.with(context).load(posterURL)
+                            .fit()
+                            .centerCrop()
+                            .placeholder(R.drawable.bg_movie_thumb)
+                            .into(holder.image);
+
+                    // DEBUG: using Picasso.Listener to detect load failure
+                    //
+                    //        Picasso.Builder builder = new Picasso.Builder(context);
+                    //        builder.listener(new Picasso.Listener() {
+                    //            @Override
+                    //            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
+                    //                exception.printStackTrace();
+                    //            }
+                    //        });
+                    //
+                    //        builder.build().load(movies.get(position).getPosterPath())
+                    //                .fit()
+                    //                .centerCrop()
+                    //                .placeholder(R.drawable.bg_movie_thumb)
+                    //                .into(holder.image);
+
+                    holder.loading.setVisibility(View.GONE);
+                    holder.title.setVisibility(View.GONE);
+                    holder.image.setVisibility(View.VISIBLE);
+
+                    holder.image.setContentDescription(title);
+                }
 
                 holder.image.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -191,8 +214,10 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
                 });
 
                 break;
+
             case LOADING_MOVIE:
                 holder.image.setVisibility(View.GONE);
+                holder.title.setVisibility(View.GONE);
                 holder.loading.setVisibility(View.VISIBLE);
                 break;
         }
@@ -218,6 +243,9 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 
         @BindView(R.id.discovery_item_loading_pb)
         ProgressBar loading;
+
+        @BindView(R.id.discovery_item_title_tv)
+        TextView title;
 
         public ViewHolder(View itemView) {
             super(itemView);
