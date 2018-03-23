@@ -7,14 +7,28 @@ import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.example.android.popularmovies.DiscoveryAdapter.MovieClickListener;
+import com.example.android.popularmovies.components.PaginationScrollListener;
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.utilities.GsonRequest;
+import com.example.android.popularmovies.utilities.NetworkUtils;
+import com.example.android.popularmovies.utilities.TMDbUtils;
 
+import org.parceler.Parcel;
 import org.parceler.Parcels;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindInt;
 import butterknife.BindString;
@@ -24,6 +38,13 @@ import butterknife.ButterKnife;
 public class DiscoveryActivity extends AppCompatActivity {
 
     private static final String TAG = DiscoveryActivity.class.getSimpleName();
+
+    /**
+     * Available sort options provided by the adapter
+     */
+    public enum SortOption {
+        POPULARITY, TOP_RATED, RELEASE_DATE, REVENUE
+    }
 
     @BindView(R.id.discovery_list_rv)
     RecyclerView discoveryRecyclerView;
@@ -54,6 +75,22 @@ public class DiscoveryActivity extends AppCompatActivity {
     @BindString(R.string.pref_discovery_sort_default)
     String sortPrefDefault;
 
+    // Discovered pages count
+    private int pageCount;
+
+    // Total result pages count
+    private int totalPageCount;
+
+    // Loading flag
+    private boolean isLoading;
+
+    // Current SortOption
+    private final SortOption defaultSortOption = SortOption.POPULARITY;
+
+    // Current SortOption
+    private SortOption currentSortOption = defaultSortOption;
+
+
     // Saved instance state Bundle keys
     private final static String LAYOUT_STATE_BUNDLE_KEY = "layout_state";
     private final static String ADAPTER_STATE_BUNDLE_KEY = "adapter_state";
@@ -64,6 +101,9 @@ public class DiscoveryActivity extends AppCompatActivity {
 
     // MovieClickListener
     private MovieClickListener movieClickListener;
+
+    // Scroll listener
+    private ScrollListener scrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +126,7 @@ public class DiscoveryActivity extends AppCompatActivity {
             Parcelable layoutState = savedInstanceState.getParcelable(LAYOUT_STATE_BUNDLE_KEY);
             String title = savedInstanceState.getString(TITLE_BUNDLE_KEY);
 
-            discoveryAdapter.restoreInstanceState(adapterState);
+            restoreInstanceState(adapterState);
             discoveryRecyclerView.getLayoutManager().onRestoreInstanceState(layoutState);
             setTitle(title);
         }
@@ -95,6 +135,7 @@ public class DiscoveryActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
         if (movieClickListener == null) {
             movieClickListener = new MovieClickListener() {
                 @Override
@@ -109,14 +150,26 @@ public class DiscoveryActivity extends AppCompatActivity {
             };
             discoveryAdapter.addMovieClickListener(movieClickListener);
         }
+
+        if (scrollListener == null) {
+            scrollListener = new ScrollListener(
+                    (LinearLayoutManager) discoveryRecyclerView.getLayoutManager());
+            discoveryRecyclerView.addOnScrollListener(scrollListener);
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+
         if (movieClickListener != null) {
             discoveryAdapter.removeMovieClickListener(movieClickListener);
             movieClickListener = null;
+        }
+
+        if (scrollListener != null) {
+            discoveryRecyclerView.removeOnScrollListener(scrollListener);
+            scrollListener = null;
         }
     }
 
@@ -211,16 +264,16 @@ public class DiscoveryActivity extends AppCompatActivity {
 
         if (sortPrefPopularity.equals(preferenceValue)) {
             setTitle(R.string.popular_movies);
-            discoveryAdapter.discoverMore(DiscoveryAdapter.SortOption.POPULARITY);
+            discoverMore(SortOption.POPULARITY);
         } else if (sortPrefTopRated.equals(preferenceValue)) {
             setTitle(R.string.top_rated_movies);
-            discoveryAdapter.discoverMore(DiscoveryAdapter.SortOption.TOP_RATED);
+            discoverMore(SortOption.TOP_RATED);
         } else if (sortPrefReleaseDate.equals(preferenceValue)) {
             setTitle(R.string.recently_released_movies);
-            discoveryAdapter.discoverMore(DiscoveryAdapter.SortOption.RELEASE_DATE);
+            discoverMore(SortOption.RELEASE_DATE);
         } else if (sortPrefRevenue.equals(preferenceValue)) {
             setTitle(R.string.highest_grossing_movies);
-            discoveryAdapter.discoverMore(DiscoveryAdapter.SortOption.REVENUE);
+            discoverMore(SortOption.REVENUE);
         }
 
     }
@@ -229,11 +282,186 @@ public class DiscoveryActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        Parcelable adapterState = discoveryAdapter.saveInstanceState();
+        Parcelable adapterState = saveInstanceState();
         Parcelable layoutState = discoveryRecyclerView.getLayoutManager().onSaveInstanceState();
 
         outState.putParcelable(ADAPTER_STATE_BUNDLE_KEY, adapterState);
         outState.putParcelable(LAYOUT_STATE_BUNDLE_KEY, layoutState);
         outState.putString(TITLE_BUNDLE_KEY, String.valueOf(getTitle()));
+    }
+
+    /**
+     * Loads more movies using the current sort option.
+     */
+    public void discoverMore() {
+        discoverMore(null);
+    }
+
+    /**
+     * Loads more movies using the provided sort option.
+     *
+     * @param sortOption
+     */
+    public void discoverMore(SortOption sortOption) {
+
+        if (sortOption != null && !currentSortOption.equals(sortOption)) {
+            this.currentSortOption = sortOption;
+            if (isLoading) {
+                isLoading = false;
+                discoveryAdapter.stopLoading();
+            }
+            discoveryAdapter.clear();
+            pageCount = 0;
+        }
+
+        Integer page = pageCount > 0 ? pageCount + 1 : null;
+
+        String url = null;
+
+        switch (this.currentSortOption) {
+            case POPULARITY:
+                url = TMDbUtils.buildPopularMoviesURL(page).toString();
+                break;
+            case TOP_RATED:
+                url = TMDbUtils.buildTopRatedMoviesURL(page).toString();
+                break;
+            case RELEASE_DATE:
+                url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.RELEASE_DATE, page).toString();
+                break;
+            case REVENUE:
+                url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.REVENUE, page).toString();
+                break;
+            default:
+                url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.POPULARITY, page).toString();
+        }
+
+        if (!isLoading) {
+            isLoading = true;
+            discoveryAdapter.startLoading();
+        }
+
+        Request movieRequest
+                = new GsonRequest<Movie.Page>(Request.Method.GET,
+                url,
+                null,
+                Movie.Page.class,
+                null,
+                new Response.Listener<Movie.Page>() {
+                    @Override
+                    public void onResponse(Movie.Page moviePage) {
+                        if (isLoading) {
+                            isLoading = false;
+                            discoveryAdapter.stopLoading();
+                        }
+                        Log.d(TAG, "Movie Page: " + moviePage);
+
+                        pageCount = moviePage.getPage();
+                        totalPageCount = moviePage.getTotalPages();
+                        discoveryAdapter.addAll(moviePage.getResults());
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        if (isLoading) {
+                            isLoading = false;
+                            discoveryAdapter.stopLoading();
+                        }
+
+                        Toast.makeText(DiscoveryActivity.this,
+                                "Couldn't load movies", Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "VolleyError: " + error.getMessage());
+                    }
+                });
+
+        NetworkUtils.get(DiscoveryActivity.this).addToRequestQueue(movieRequest);
+    }
+
+    /**
+     * Generates the adapter's state as a {@link Parcelable}
+     *
+     * @return the adapter's instance state
+     */
+    public Parcelable saveInstanceState() {
+
+        SavedInstanceState state = new SavedInstanceState();
+        state.movies = discoveryAdapter.getMovies();
+        state.pageCount = pageCount;
+        state.totalPageCount = totalPageCount;
+        state.isLoading = this.isLoading;
+        state.currentSortOption = currentSortOption;
+
+        return Parcels.wrap(state);
+    }
+
+    /**
+     * Restores the adapter's state using a {@link Parcelable} generated by
+     * saveInstanceState()
+     *
+     * @param savedInstanceState {@link Parcelable} generated by saveInstanceState()
+     */
+    public void restoreInstanceState(Parcelable savedInstanceState) {
+        SavedInstanceState state = Parcels.unwrap(savedInstanceState);
+
+        // NOTE: setting the List directly inside the adapter works as well!
+        discoveryAdapter.addAll(state.movies);
+        this.pageCount = state.pageCount;
+        this.totalPageCount = state.totalPageCount;
+        this.isLoading = state.isLoading;
+        this.currentSortOption = state.currentSortOption;
+    }
+
+    /**
+     * A class to save the adapter's state
+     */
+    @Parcel
+    static class SavedInstanceState {
+        // Discovered movies list
+        List<Movie> movies = new ArrayList<Movie>();
+        // Discovered pages count
+        int pageCount;
+        // Total result pages count
+        int totalPageCount;
+        // Loading flag
+        boolean isLoading;
+        // Current SortOption
+        SortOption currentSortOption;
+    }
+
+    /**
+     * Custom Pagination {@link RecyclerView.OnScrollListener} instance to be set to the {@link RecyclerView}.
+     */
+    private class ScrollListener extends PaginationScrollListener {
+
+        /**
+         * Initializes a new ScrollListener with an Adapter and a LayoutManager
+         *
+         * @param layoutManager {@link RecyclerView}'s LayoutManager
+         */
+        public ScrollListener(LinearLayoutManager layoutManager) {
+            super(layoutManager);
+        }
+
+        @Override
+        protected void loadMoreItems() {
+            discoverMore();
+        }
+
+        @Override
+        public int getTotalPageCount() {
+            return totalPageCount;
+        }
+
+        @Override
+        public boolean isLastPage() {
+            return pageCount >= getTotalPageCount();
+        }
+
+        @Override
+        public boolean isLoading() {
+            return isLoading;
+        }
     }
 }

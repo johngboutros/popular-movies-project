@@ -1,14 +1,11 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,20 +13,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.example.android.popularmovies.components.PaginationScrollListener;
 import com.example.android.popularmovies.data.Movie;
-import com.example.android.popularmovies.utilities.GsonRequest;
-import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.utilities.TMDbUtils;
 import com.squareup.picasso.Picasso;
-
-import org.parceler.Parcel;
-import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,23 +39,8 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     // Discovered movies list
     private List<Movie> movies = new ArrayList<Movie>();
 
-    // Discovered pages count
-    private int pageCount;
-
-    // Total result pages count
-    private int totalPageCount;
-
-    // Loading flag
-    private boolean isLoading;
-
-    // Current SortOption
-    private SortOption currentSortOption = SortOption.POPULARITY;
-
     // Registered Movie Click Listeners
     private List<MovieClickListener> movieClickListeners = new ArrayList<MovieClickListener>();
-
-    // Scroll listener
-    private ScrollListener scrollListener;
 
     /**
      * ItemType could be used to view some items in a different way such as taking a whole row span
@@ -76,13 +48,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
      */
     private enum ItemType {
         MOVIE, LOADING_MOVIE
-    }
-
-    /**
-     * Available sort options provided by the adapter
-     */
-    public enum SortOption {
-        POPULARITY, TOP_RATED, RELEASE_DATE, REVENUE
     }
 
     /**
@@ -285,29 +250,30 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     }
 
     public void clear() {
-        stopLoading();
         while (getItemCount() > 0) {
             remove(getItem(0));
         }
-        pageCount = 0;
     }
 
     public boolean isEmpty() {
         return getItemCount() == 0;
     }
 
-    public void startLoading() {
-        if (isLoading) return;
-        isLoading = true;
+    /**
+     * Returns the currently displayed movies List.
+     *
+     * @return the currently displayed movies List.
+     */
+    public List<Movie> getMovies() {
+        return movies;
+    }
 
+    public void startLoading() {
         // An empty movie should be viewed as a loading view
         add(new Movie());
     }
 
     public void stopLoading() {
-        if (!isLoading) return;
-        isLoading = false;
-
         int position = movies.size() - 1;
         Movie item = getItem(position);
 
@@ -322,138 +288,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     }
 
     /**
-     * Loads more movies using the current sort option.
-     */
-    public void discoverMore() {
-        discoverMore(null);
-    }
-
-    /**
-     * Loads more movies using the provided sort option.
-     *
-     * @param sortOption
-     */
-    public void discoverMore(SortOption sortOption) {
-
-        if (sortOption != null && !currentSortOption.equals(sortOption)) {
-            this.currentSortOption = sortOption;
-            clear();
-        }
-
-        Integer page = pageCount > 0 ? pageCount + 1 : null;
-
-        String url = null;
-
-        switch (this.currentSortOption) {
-            case POPULARITY:
-                url = TMDbUtils.buildPopularMoviesURL(page).toString();
-                break;
-            case TOP_RATED:
-                url = TMDbUtils.buildTopRatedMoviesURL(page).toString();
-                break;
-            case RELEASE_DATE:
-                url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.RELEASE_DATE, page).toString();
-                break;
-            case REVENUE:
-                url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.REVENUE, page).toString();
-                break;
-            default:
-                url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.POPULARITY, page).toString();
-        }
-
-        startLoading();
-
-        Request movieRequest
-                = new GsonRequest<Movie.Page>(Request.Method.GET,
-                url,
-                null,
-                Movie.Page.class,
-                null,
-                new Response.Listener<Movie.Page>() {
-                    @Override
-                    public void onResponse(Movie.Page moviePage) {
-                        stopLoading();
-                        Log.d(TAG, "Movie Page: " + moviePage);
-
-                        pageCount = moviePage.getPage();
-                        totalPageCount = moviePage.getTotalPages();
-                        addAll(moviePage.getResults());
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        stopLoading();
-                        Toast.makeText(context,
-                                "Couldn't load movies", Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "VolleyError: " + error.getMessage());
-                    }
-                });
-
-        NetworkUtils.get(context).addToRequestQueue(movieRequest);
-    }
-
-    /**
-     * Custom Pagination {@link OnScrollListener} instance to be set to the {@link RecyclerView}.
-     */
-    private class ScrollListener extends PaginationScrollListener {
-
-        /**
-         * Initializes a new ScrollListener with an Adapter and a LayoutManager
-         *
-         * @param layoutManager {@link RecyclerView}'s LayoutManager
-         */
-        public ScrollListener(LinearLayoutManager layoutManager) {
-            super(layoutManager);
-
-            if (layoutManager instanceof GridLayoutManager) {
-                ((GridLayoutManager) layoutManager)
-                        .setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                            /**
-                             * Returns the number of span occupied by the item at <code>position</code>.
-                             *
-                             * @param position The adapter position of the item
-                             * @return The number of spans occupied by the item at the provided position
-                             */
-                            @Override
-                            public int getSpanSize(int position) {
-                                ItemType itemType = getItemType(position);
-                                switch (itemType) {
-                                    case MOVIE:
-                                        return 1;
-                                    case LOADING_MOVIE:
-                                        return context.getResources()
-                                                .getInteger(R.integer.discovery_grid_columns);
-                                }
-                                return 0;
-                            }
-                        });
-            }
-        }
-
-        @Override
-        protected void loadMoreItems() {
-            discoverMore();
-        }
-
-        @Override
-        public int getTotalPageCount() {
-            return totalPageCount;
-        }
-
-        @Override
-        public boolean isLastPage() {
-            return pageCount >= getTotalPageCount();
-        }
-
-        @Override
-        public boolean isLoading() {
-            return isLoading;
-        }
-    }
-
-    /**
      * Called by RecyclerView when it starts observing this Adapter.
      * <p>
      * Keep in mind that same adapter may be observed by multiple RecyclerViews.
@@ -465,12 +299,29 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
 
-        // This implementation assumes that only 1 RecyclerView observes this adapter
-        if (scrollListener == null) {
-            scrollListener = new ScrollListener(layoutManager);
+        if (recyclerView.getLayoutManager() instanceof GridLayoutManager) {
+            ((GridLayoutManager) recyclerView.getLayoutManager())
+                    .setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                        /**
+                         * Returns the number of span occupied by the item at <code>position</code>.
+                         *
+                         * @param position The adapter position of the item
+                         * @return The number of spans occupied by the item at the provided position
+                         */
+                        @Override
+                        public int getSpanSize(int position) {
+                            ItemType itemType = getItemType(position);
+                            switch (itemType) {
+                                case MOVIE:
+                                    return 1;
+                                case LOADING_MOVIE:
+                                    return context.getResources()
+                                            .getInteger(R.integer.discovery_grid_columns);
+                            }
+                            return 0;
+                        }
+                    });
         }
-
-        recyclerView.addOnScrollListener(scrollListener);
     }
 
     /**
@@ -482,11 +333,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
-
-        if (scrollListener != null) {
-            recyclerView.removeOnScrollListener(scrollListener);
-            scrollListener = null;
-        }
     }
 
     /**
@@ -551,55 +397,5 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
      */
     public void removeMovieClickListener(MovieClickListener listener) {
         movieClickListeners.remove(listener);
-    }
-
-    /**
-     * Generates the adapter's state as a {@link Parcelable}
-     *
-     * @return the adapter's instance state
-     */
-    public Parcelable saveInstanceState() {
-
-        SavedInstanceState state = new SavedInstanceState();
-        state.movies = movies;
-        state.pageCount = pageCount;
-        state.totalPageCount = totalPageCount;
-        state.isLoading = isLoading;
-        state.currentSortOption = currentSortOption;
-
-        return Parcels.wrap(state);
-    }
-
-    /**
-     * Restores the adapter's state using a {@link Parcelable} generated by
-     * saveInstanceState()
-     *
-     * @param savedInstanceState {@link Parcelable} generated by saveInstanceState()
-     */
-    public void restoreInstanceState(Parcelable savedInstanceState) {
-        SavedInstanceState state = Parcels.unwrap(savedInstanceState);
-
-        this.movies = state.movies;
-        this.pageCount = state.pageCount;
-        this.totalPageCount = state.totalPageCount;
-        this.isLoading = state.isLoading;
-        this.currentSortOption = state.currentSortOption;
-    }
-
-    /**
-     * A class to save the adapter's state
-     */
-    @Parcel
-    static class SavedInstanceState {
-        // Discovered movies list
-        List<Movie> movies = new ArrayList<Movie>();
-        // Discovered pages count
-        int pageCount;
-        // Total result pages count
-        int totalPageCount;
-        // Loading flag
-        boolean isLoading;
-        // Current SortOption
-        SortOption currentSortOption;
     }
 }
