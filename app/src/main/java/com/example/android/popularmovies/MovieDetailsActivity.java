@@ -1,12 +1,21 @@
 package com.example.android.popularmovies;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.data.Video;
+import com.example.android.popularmovies.utilities.GsonRequest;
+import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.utilities.TMDbUtils;
 import com.squareup.picasso.Picasso;
 
@@ -19,6 +28,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MovieDetailsActivity extends AppCompatActivity {
+
+    private static final String TAG = MovieDetailsActivity.class.getSimpleName();
 
     // Movie Intent Extra param
     public static final String MOVIE_EXTRA_PARAM = "movie";
@@ -55,6 +66,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
 
+        // Load videos
+        loadVideos(movie.getId());
+
         setTitle(movie.getTitle());
 
         if (TextUtils.isEmpty(movie.getPosterPath())) {
@@ -86,5 +100,47 @@ public class MovieDetailsActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(movie.getOverview())) {
             overviewDisplay.setText(movie.getOverview());
         }
+    }
+
+    private void loadVideos(@NonNull Integer movieId) {
+
+        String url = TMDbUtils.buildMovieVideosUrl(movieId).toString();
+
+        // TODO show loading..
+
+        Request movieRequest
+                = new GsonRequest<Video.Page>(Request.Method.GET,
+                url,
+                null,
+                Video.Page.class,
+                null,
+                new Response.Listener<Video.Page>() {
+                    @Override
+                    public void onResponse(Video.Page page) {
+
+                        // TODO stop loading
+
+                        Log.d(TAG, "Page: " + page);
+
+                        // TODO display videos
+                        Toast.makeText(MovieDetailsActivity.this,
+                                "Page: " + page, Toast.LENGTH_LONG).show();
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        // TODO stop loading
+
+                        Toast.makeText(MovieDetailsActivity.this,
+                                "Couldn't load videos", Toast.LENGTH_LONG).show();
+
+                        Log.e(TAG, "VolleyError: " + error.getMessage());
+                    }
+                });
+
+        NetworkUtils.get(MovieDetailsActivity.this).addToRequestQueue(movieRequest);
     }
 }

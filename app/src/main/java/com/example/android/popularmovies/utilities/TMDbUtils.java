@@ -46,6 +46,11 @@ public class TMDbUtils {
     // https://api.themoviedb.org/3/movie/550?api_key=[YOUR_API_KEY]
     private static final String MOVIE_PATH = "/movie/%s";
 
+    // Movie path
+    // Example API request:
+    // https://api.themoviedb.org/3/movie/550/videos?api_key=[YOUR_API_KEY]
+    private static final String MOVIE_VIDEOS_PATH = MOVIE_PATH + "/videos";
+
 
     // Poster URL
     // Example:
@@ -292,6 +297,21 @@ public class TMDbUtils {
         return buildUrl(uri);
     }
 
+    /**
+     * Builds a URL for a GET Request that retrieves a list of videos for a given movie Id.
+     *
+     * @param movieId given movie Id
+     * @return GET Request URL
+     */
+    public static URL buildMovieVideosUrl(@NonNull Integer movieId) {
+
+        Uri uri = Uri.parse(API_BASE_URL + String.format(MOVIE_VIDEOS_PATH, movieId.toString()))
+                .buildUpon()
+                .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                .build();
+
+        return buildUrl(uri);
+    }
 
     /**
      * Builds a URL for a given URI.

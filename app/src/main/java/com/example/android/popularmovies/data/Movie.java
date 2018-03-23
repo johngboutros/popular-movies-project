@@ -86,11 +86,13 @@ public class Movie  {
         }
     }
 
-    // page            integer         optional
-    // results         array[Movie]    optional
-    // total_results   integer         optional
-    // total_pages     integer         optional
     public static class Page {
+
+        // page            integer         optional
+        // results         array[Movie]    optional
+        // total_results   integer         optional
+        // total_pages     integer         optional
+
         private Integer page;
         private List<Movie> results;
         @SerializedName("total_results")
