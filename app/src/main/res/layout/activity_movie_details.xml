@@ -27,9 +27,9 @@
             android:id="@+id/movie_detail_year_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/movie_detail_margin_left"
-            android:layout_marginStart="@dimen/movie_detail_margin_left"
-            android:layout_marginTop="@dimen/movie_detail_margin_top"
+            android:layout_marginLeft="@dimen/movie_detail_aside_margin_left"
+            android:layout_marginStart="@dimen/movie_detail_aside_margin_left"
+            android:layout_marginTop="@dimen/movie_detail_aside_margin_top"
             android:textSize="@dimen/movie_detail_year_text_size"
             app:layout_constraintStart_toEndOf="@+id/movie_detail_image_iv"
             app:layout_constraintTop_toTopOf="@+id/movie_detail_image_iv"
@@ -50,7 +50,7 @@
             android:id="@+id/movie_detail_rate_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/movie_detail_margin_top"
+            android:layout_marginTop="@dimen/movie_detail_aside_margin_top"
             android:textSize="@dimen/movie_detail_paragraph_text_size"
             app:layout_constraintStart_toStartOf="@+id/movie_detail_year_tv"
             app:layout_constraintTop_toBottomOf="@+id/movie_detail_year_tv"
@@ -60,14 +60,50 @@
             android:id="@+id/movie_detail_overview_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/movie_detail_overview_margin_h"
-            android:layout_marginStart="@dimen/movie_detail_overview_margin_h"
-            android:layout_marginTop="@dimen/movie_detail_margin_top"
+            android:layout_marginEnd="@dimen/movie_detail_row_margin_h"
+            android:layout_marginStart="@dimen/movie_detail_row_margin_h"
+            android:layout_marginTop="@dimen/movie_detail_row_margin_top"
             android:textSize="@dimen/movie_detail_paragraph_text_size"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/movie_detail_image_iv"
             tools:text="@tools:sample/lorem/random" />
+
+        <!--Horizontal Separator-->
+        <View
+            android:id="@+id/movie_detail_trailers_separator_v"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_margin="@dimen/movie_detail_separator_margin"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/movie_detail_overview_tv" />
+
+        <TextView
+            android:id="@+id/movie_detail_trailers_label_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/movie_detail_row_margin_h"
+            android:layout_marginStart="@dimen/movie_detail_row_margin_h"
+            android:layout_marginTop="@dimen/movie_detail_row_margin_top"
+            android:text="@string/movie_detail_trailers_label"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+            android:textSize="@dimen/movie_detail_paragraph_text_size"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/movie_detail_trailers_separator_v" />
+
+        <LinearLayout
+            android:id="@+id/movie_detail_videos_container_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/movie_detail_trailers_label_tv">
+
+        </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>
 

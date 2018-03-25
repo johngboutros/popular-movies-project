@@ -5,7 +5,9 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +41,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     @BindView(R.id.movie_detail_year_tv)
     TextView yearDisplay;
+
+    @BindView(R.id.movie_detail_videos_container_ll)
+    LinearLayout videosContainer;
 
 
 //    @BindView(R.id.movie_detail_duration_tv)
@@ -123,8 +128,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
                         Log.d(TAG, "Page: " + page);
 
                         // TODO display videos
-                        Toast.makeText(MovieDetailsActivity.this,
-                                "Page: " + page, Toast.LENGTH_LONG).show();
+//                        Toast.makeText(MovieDetailsActivity.this,
+//                                "Page: " + page, Toast.LENGTH_LONG).show();
+                        for (Video video: page.getResults()) {
+                            addVideo(video.getName());
+                        }
 
                     }
                 },
@@ -142,5 +150,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 });
 
         NetworkUtils.get(MovieDetailsActivity.this).addToRequestQueue(movieRequest);
+    }
+
+    private void addVideo(String name) {
+        View videoItem = getLayoutInflater()
+                .inflate(R.layout.item_movie_details_video, videosContainer, false);
+        TextView title = videoItem.findViewById(R.id.video_item_name_tv);
+        title.setText(name);
+        videosContainer.addView(videoItem);
     }
 }
