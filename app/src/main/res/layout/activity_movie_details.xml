@@ -73,7 +73,7 @@
         <View
             android:id="@+id/movie_detail_trailers_separator_v"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="@dimen/movie_detail_separator_thickness"
             android:layout_margin="@dimen/movie_detail_separator_margin"
             android:background="@android:color/darker_gray"
             app:layout_constraintEnd_toEndOf="parent"
@@ -93,6 +93,16 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/movie_detail_trailers_separator_v" />
+
+        <ProgressBar
+            android:id="@+id/movie_detail_trailers_loading_pb"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/discovery_item_loading_height"
+            android:layout_margin="@dimen/discovery_item_loading_margin"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/movie_detail_trailers_label_tv" />
 
         <LinearLayout
             android:id="@+id/movie_detail_videos_container_ll"

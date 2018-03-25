@@ -1,34 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/movie_detail_row_margin_h"
+    android:layout_marginStart="@dimen/movie_detail_row_margin_h"
     android:orientation="horizontal">
 
-    <!--<ImageView-->
-        <!--android:id="@+id/discovery_item_image_iv"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="@dimen/discovery_item_height"-->
-        <!--android:scaleType="centerCrop"-->
-        <!--tools:src="@drawable/bg_movie_thumb">-->
+    <ImageView
+        android:layout_width="@dimen/movie_detail_video_item_width"
+        android:layout_height="@dimen/movie_detail_video_item_width"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_play"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <!--</ImageView>-->
+    </ImageView>
 
     <TextView
-        android:id="@+id/video_item_name_tv"
+        android:id="@+id/movie_detail_video_item_name_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/discovery_item_image_text_margin"
-        android:layout_marginStart="@dimen/discovery_item_image_text_margin"
-        android:layout_marginTop="@dimen/discovery_item_image_text_margin_top"
+        android:layout_marginEnd="@dimen/movie_detail_row_margin_h"
+        android:layout_marginStart="@dimen/movie_detail_row_margin_h"
         android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="@dimen/movie_detail_paragraph_text_size"
+        app:layout_constraintBottom_toTopOf="@+id/movie_detail_video_item_separator_v"
+        app:layout_constraintStart_toEndOf="@+id/discovery_item_image_iv"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="Video Name" />
 
-    <ProgressBar
-        android:id="@+id/discovery_item_loading_pb"
+
+    <!--Horizontal Separator-->
+    <View
+        android:id="@+id/movie_detail_video_item_separator_v"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/discovery_item_loading_height"
-        android:layout_margin="@dimen/discovery_item_loading_margin"
-        android:visibility="gone" />
-</LinearLayout>
+        android:layout_height="@dimen/movie_detail_sub_separator_thickness"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/discovery_item_image_iv" />
+
+</android.support.constraint.ConstraintLayout>

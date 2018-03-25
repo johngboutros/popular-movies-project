@@ -24,6 +24,7 @@ import com.squareup.picasso.Picasso;
 import org.parceler.Parcels;
 
 import java.text.SimpleDateFormat;
+import java.util.Iterator;
 
 import butterknife.BindString;
 import butterknife.BindView;
@@ -45,6 +46,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.movie_detail_videos_container_ll)
     LinearLayout videosContainer;
 
+    @BindView(R.id.movie_detail_trailers_label_tv)
+    View trailersLabel;
+
+    @BindView(R.id.movie_detail_trailers_loading_pb)
+    View trailersLoading;
 
 //    @BindView(R.id.movie_detail_duration_tv)
 //    TextView durationDisplay;
@@ -111,8 +117,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         String url = TMDbUtils.buildMovieVideosUrl(movieId).toString();
 
-        // TODO show loading..
+        // Start loading
+        trailersLoading.setVisibility(View.VISIBLE);
 
+        // Display trailers
         Request movieRequest
                 = new GsonRequest<Video.Page>(Request.Method.GET,
                 url,
@@ -123,15 +131,38 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Video.Page page) {
 
-                        // TODO stop loading
+                        // Stop loading
+                        trailersLoading.setVisibility(View.GONE);
 
                         Log.d(TAG, "Page: " + page);
 
-                        // TODO display videos
-//                        Toast.makeText(MovieDetailsActivity.this,
-//                                "Page: " + page, Toast.LENGTH_LONG).show();
-                        for (Video video: page.getResults()) {
-                            addVideo(video.getName());
+                        if (page.getResults() != null && !page.getResults().isEmpty()) {
+
+                            Iterator<Video> videoIterator = page.getResults().iterator();
+
+                            while (videoIterator.hasNext()) {
+                                Video video = videoIterator.next();
+
+                                View videoItem = getLayoutInflater()
+                                        .inflate(R.layout.item_movie_details_video, videosContainer,
+                                                false);
+
+                                TextView title = videoItem
+                                        .findViewById(R.id.movie_detail_video_item_name_tv);
+                                title.setText(video.getName());
+
+                                if (!videoIterator.hasNext()) {
+                                    View separator = videoItem
+                                            .findViewById(R.id.movie_detail_video_item_separator_v);
+                                    separator.setVisibility(View.INVISIBLE);
+                                }
+
+                                // TODO handle click
+
+                                videosContainer.addView(videoItem);
+                            }
+                        } else {
+                            trailersLabel.setVisibility(View.GONE);
                         }
 
                     }
@@ -140,23 +171,18 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
 
-                        // TODO stop loading
+                        // Stop loading
+                        trailersLoading.setVisibility(View.GONE);
+
+                        trailersLabel.setVisibility(View.GONE);
 
                         Toast.makeText(MovieDetailsActivity.this,
-                                "Couldn't load videos", Toast.LENGTH_LONG).show();
+                                "Couldn't load trailers", Toast.LENGTH_LONG).show();
 
                         Log.e(TAG, "VolleyError: " + error.getMessage());
                     }
                 });
 
         NetworkUtils.get(MovieDetailsActivity.this).addToRequestQueue(movieRequest);
-    }
-
-    private void addVideo(String name) {
-        View videoItem = getLayoutInflater()
-                .inflate(R.layout.item_movie_details_video, videosContainer, false);
-        TextView title = videoItem.findViewById(R.id.video_item_name_tv);
-        title.setText(name);
-        videosContainer.addView(videoItem);
     }
 }

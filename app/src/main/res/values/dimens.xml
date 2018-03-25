@@ -19,4 +19,5 @@
     <dimen name="movie_detail_separator_margin">16dp</dimen>
     <dimen name="movie_detail_separator_thickness">2dp</dimen>
     <dimen name="movie_detail_sub_separator_thickness">1dp</dimen>
+    <dimen name="movie_detail_video_item_width">48dp</dimen>
 </resources>
