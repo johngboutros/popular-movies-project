@@ -9,11 +9,12 @@
     android:orientation="horizontal">
 
     <ImageView
+        android:id="@+id/movie_detail_video_item_play_iv"
         android:layout_width="@dimen/movie_detail_video_item_width"
         android:layout_height="@dimen/movie_detail_video_item_width"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_play"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/movie_detail_video_item_separator_v"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -21,14 +22,15 @@
 
     <TextView
         android:id="@+id/movie_detail_video_item_name_tv"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/movie_detail_row_margin_h"
         android:layout_marginStart="@dimen/movie_detail_row_margin_h"
-        android:gravity="center"
+        android:gravity="left|center_vertical"
         android:textSize="@dimen/movie_detail_paragraph_text_size"
         app:layout_constraintBottom_toTopOf="@+id/movie_detail_video_item_separator_v"
-        app:layout_constraintStart_toEndOf="@+id/discovery_item_image_iv"
+        app:layout_constraintStart_toEndOf="@+id/movie_detail_video_item_play_iv"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Video Name" />
 
@@ -41,6 +43,6 @@
         android:background="@android:color/darker_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/discovery_item_image_iv" />
+        app:layout_constraintTop_toBottomOf="@+id/movie_detail_video_item_play_iv" />
 
 </android.support.constraint.ConstraintLayout>
