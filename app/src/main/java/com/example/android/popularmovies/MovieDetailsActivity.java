@@ -141,7 +141,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                             Iterator<Video> videoIterator = page.getResults().iterator();
 
                             while (videoIterator.hasNext()) {
-                                Video video = videoIterator.next();
+                                final Video video = videoIterator.next();
 
                                 View videoItem = getLayoutInflater()
                                         .inflate(R.layout.item_movie_details_video, videosContainer,
@@ -158,6 +158,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
                                 }
 
                                 // TODO handle click
+                                videoItem.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        // TODO remove test code
+                                        Toast.makeText(MovieDetailsActivity.this,
+                                                video.getName(), Toast.LENGTH_LONG).show();
+                                    }
+                                });
 
                                 videosContainer.addView(videoItem);
                             }
