@@ -1,5 +1,7 @@
 package com.example.android.popularmovies;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -157,13 +159,29 @@ public class MovieDetailsActivity extends AppCompatActivity {
                                     separator.setVisibility(View.INVISIBLE);
                                 }
 
-                                // TODO handle click
+                                // Handle video click
                                 videoItem.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        // TODO remove test code
-                                        Toast.makeText(MovieDetailsActivity.this,
-                                                video.getName(), Toast.LENGTH_LONG).show();
+
+                                        if (video.getSite() != null
+                                                && video.getSite().toLowerCase().equals("youtube")) {
+
+                                            Uri webpage = TMDbUtils.buildYoutubeUri(video.getKey());
+                                            Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+
+                                            if (intent.resolveActivity(getPackageManager()) != null) {
+                                                startActivity(intent);
+                                            }
+
+                                        } else {
+                                            Toast.makeText(MovieDetailsActivity.this,
+                                                    getString(R.string.movie_detail_video_not_supported),
+                                                    Toast.LENGTH_LONG).show();
+
+                                            Log.e(TAG, "Video site not supported: " + video.getSite());
+                                        }
+
                                     }
                                 });
 

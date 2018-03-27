@@ -3,7 +3,6 @@ package com.example.android.popularmovies.utilities;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.widget.Switch;
 
 import com.example.android.popularmovies.BuildConfig;
 
@@ -50,6 +49,13 @@ public class TMDbUtils {
     // Example API request:
     // https://api.themoviedb.org/3/movie/550/videos?api_key=[YOUR_API_KEY]
     private static final String MOVIE_VIDEOS_PATH = MOVIE_PATH + "/videos";
+
+
+    // Youtube video path (https://www.youtube.com/watch?v=<VIDEO_KEY>)
+    // Example API request:
+    // https://www.youtube.com/watch?v=SUXWAEX2jlg
+    private static final String YOUTUBE_VIDEO_PATH = "https://www.youtube.com/watch";
+    private static final String YOUTUBE_VIDEO_KEY_PARAM = "v";
 
 
     // Poster URL
@@ -311,6 +317,22 @@ public class TMDbUtils {
                 .build();
 
         return buildUrl(uri);
+    }
+
+    /**
+     * Builds a Youtube video URI.
+     *
+     * @param key Video key
+     * @return Youtube video URI
+     */
+    public static Uri buildYoutubeUri(@NonNull String key) {
+
+        Uri uri = Uri.parse(YOUTUBE_VIDEO_PATH)
+                .buildUpon()
+                .appendQueryParameter(YOUTUBE_VIDEO_KEY_PARAM, key)
+                .build();
+
+        return uri;
     }
 
     /**

@@ -371,7 +371,7 @@ public class DiscoveryActivity extends AppCompatActivity {
                         }
 
                         Toast.makeText(DiscoveryActivity.this,
-                                "Couldn't load movies", Toast.LENGTH_LONG).show();
+                                getString(R.string.discovery_load_error), Toast.LENGTH_LONG).show();
                         Log.e(TAG, "VolleyError: " + error.getMessage());
                     }
                 });

@@ -20,7 +20,10 @@ public class Video {
     // type        string      Allowed Values: Trailer, Teaser, Clip, Featurette   optional
 
     private String name;
-    // TODO finish me
+
+    private String key;
+
+    private String site;
 
     public String getName() {
         return name;
@@ -30,10 +33,28 @@ public class Video {
         this.name = name;
     }
 
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getSite() {
+        return site;
+    }
+
+    public void setSite(String site) {
+        this.site = site;
+    }
+
     @Override
     public String toString() {
         return "Video{" +
                 "name='" + name + '\'' +
+                ", key='" + key + '\'' +
+                ", site='" + site + '\'' +
                 '}';
     }
 
