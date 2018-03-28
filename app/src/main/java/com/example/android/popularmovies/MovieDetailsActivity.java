@@ -17,6 +17,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.data.Review;
 import com.example.android.popularmovies.data.Video;
 import com.example.android.popularmovies.utilities.GsonRequest;
 import com.example.android.popularmovies.utilities.NetworkUtils;
@@ -38,6 +39,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     // Movie Intent Extra param
     public static final String MOVIE_EXTRA_PARAM = "movie";
+
+    // Max displayed reviews count
+    private static final int MAX_REVIEWS_COUNT = 5;
 
     @BindView(R.id.movie_detail_image_iv)
     ImageView imageDisplay;
@@ -82,6 +86,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         // Load videos
         loadVideos(movie.getId());
 
+        // Load reviews
+        loadReviews(movie.getId());
+
         setTitle(movie.getTitle());
 
         if (TextUtils.isEmpty(movie.getPosterPath())) {
@@ -123,7 +130,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         trailersLoading.setVisibility(View.VISIBLE);
 
         // Display trailers
-        Request movieRequest
+        Request videosRequest
                 = new GsonRequest<Video.Page>(Request.Method.GET,
                 url,
                 null,
@@ -209,6 +216,94 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     }
                 });
 
-        NetworkUtils.get(MovieDetailsActivity.this).addToRequestQueue(movieRequest);
+        NetworkUtils.get(MovieDetailsActivity.this).addToRequestQueue(videosRequest);
+    }
+
+    private void loadReviews(@NonNull Integer movieId) {
+
+        String url = TMDbUtils.buildMovieReviewsUrl(movieId).toString();
+
+        // TODO Start loading
+//        trailersLoading.setVisibility(View.VISIBLE);
+
+        // Display reviews
+        Request reviewsRequest
+                = new GsonRequest<Review.Page>(Request.Method.GET,
+                url,
+                null,
+                Review.Page.class,
+                null,
+                new Response.Listener<Review.Page>() {
+                    @Override
+                    public void onResponse(Review.Page page) {
+
+                        // TODO Stop loading
+//                        trailersLoading.setVisibility(View.GONE);
+
+                        Log.d(TAG, "Page: " + page);
+
+                        if (page.getResults() != null && !page.getResults().isEmpty()) {
+
+                            Iterator<Review> reviewIterator = page.getResults().iterator();
+
+                            int displayedCount = 0;
+                            while (reviewIterator.hasNext()) {
+
+                                final Review review = reviewIterator.next();
+
+                                // Skip empty reviews
+                                if (TextUtils.isEmpty(review.getContent())) continue;
+
+                                // TODO Inflate & setup review item
+//                                View videoItem = getLayoutInflater()
+//                                        .inflate(R.layout.item_movie_details_video, videosContainer,
+//                                                false);
+
+                                String author = TextUtils.isEmpty(review.getAuthor()) ?
+                                        getString(R.string.movie_detail_reviews_unknown_author) :
+                                        review.getAuthor();
+
+                                Toast.makeText(MovieDetailsActivity.this,
+                                        "#" + displayedCount + ": " + review.getContent(),
+                                        Toast.LENGTH_SHORT).show();
+
+                                displayedCount++;
+
+                                if (!reviewIterator.hasNext() || displayedCount == MAX_REVIEWS_COUNT) {
+                                    // TODO Setup last review & exit loop
+//                                    View separator = videoItem
+//                                            .findViewById(R.id.movie_detail_video_item_separator_v);
+//                                    separator.setVisibility(View.INVISIBLE);
+
+                                    break;
+                                }
+                            }
+
+                            // TODO add review item to container
+//                          videosContainer.addView(videoItem);                            }
+                        } else {
+                            // TODO hide reviews label
+//                          trailersLabel.setVisibility(View.GONE);
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        // Stop loading
+                        trailersLoading.setVisibility(View.GONE);
+
+                        trailersLabel.setVisibility(View.GONE);
+
+                        Toast.makeText(MovieDetailsActivity.this,
+                                "Couldn't load reviews", Toast.LENGTH_LONG).show();
+
+                        Log.e(TAG, "VolleyError: " + error.getMessage());
+                    }
+                });
+
+        NetworkUtils.get(MovieDetailsActivity.this).addToRequestQueue(reviewsRequest);
     }
 }

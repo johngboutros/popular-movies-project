@@ -45,13 +45,17 @@ public class TMDbUtils {
     // https://api.themoviedb.org/3/movie/550?api_key=[YOUR_API_KEY]
     private static final String MOVIE_PATH = "/movie/%s";
 
-    // Movie path
+    // Movie videos path
     // Example API request:
     // https://api.themoviedb.org/3/movie/550/videos?api_key=[YOUR_API_KEY]
     private static final String MOVIE_VIDEOS_PATH = MOVIE_PATH + "/videos";
 
+    // Movie reviews path
+    // Example API request:
+    // https://api.themoviedb.org/3/movie/550/reviews?api_key=[YOUR_API_KEY]
+    private static final String MOVIE_REVIEWS_PATH = MOVIE_PATH + "/reviews";
 
-    // Youtube video path (https://www.youtube.com/watch?v=<VIDEO_KEY>)
+    // Youtube video path (https://www.youtube.com/watch?v=[VIDEO_KEY])
     // Example API request:
     // https://www.youtube.com/watch?v=SUXWAEX2jlg
     private static final String YOUTUBE_VIDEO_PATH = "https://www.youtube.com/watch";
@@ -312,6 +316,22 @@ public class TMDbUtils {
     public static URL buildMovieVideosUrl(@NonNull Integer movieId) {
 
         Uri uri = Uri.parse(API_BASE_URL + String.format(MOVIE_VIDEOS_PATH, movieId.toString()))
+                .buildUpon()
+                .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                .build();
+
+        return buildUrl(uri);
+    }
+
+    /**
+     * Builds a URL for a GET Request that retrieves a list of reviews for a given movie Id.
+     *
+     * @param movieId given movie Id
+     * @return GET Request URL
+     */
+    public static URL buildMovieReviewsUrl(@NonNull Integer movieId) {
+
+        Uri uri = Uri.parse(API_BASE_URL + String.format(MOVIE_REVIEWS_PATH, movieId.toString()))
                 .buildUpon()
                 .appendQueryParameter(API_KEY_PARAM, API_KEY)
                 .build();

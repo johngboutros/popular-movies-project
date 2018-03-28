@@ -25,5 +25,7 @@
     <string name="movie_detail_unrated">Unrated</string>
     <string name="movie_detail_trailers_label">Trailers:</string>
     <string name="movie_detail_video_not_supported">Video not supported</string>
+    <string name="movie_detail_reviews_label">Reviews:</string>
+    <string name="movie_detail_reviews_unknown_author">Anonymous</string>
 
 </resources>
