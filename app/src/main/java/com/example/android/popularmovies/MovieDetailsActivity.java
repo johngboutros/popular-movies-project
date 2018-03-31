@@ -49,8 +49,22 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.movie_detail_year_tv)
     TextView yearDisplay;
 
-    @BindView(R.id.movie_detail_videos_container_ll)
-    LinearLayout videosContainer;
+    private static final String YEAR_FORMAT = "yyyy";
+
+//    @BindView(R.id.movie_detail_duration_tv)
+//    TextView durationDisplay;
+
+    @BindView(R.id.movie_detail_rate_tv)
+    TextView rateDisplay;
+
+    @BindString(R.string.movie_detail_rate_format)
+    String rateFormat;
+
+    @BindView(R.id.movie_detail_overview_tv)
+    TextView overviewDisplay;
+
+    @BindView(R.id.movie_detail_trailers_separator_v)
+    View trailersSeparator;
 
     @BindView(R.id.movie_detail_trailers_label_tv)
     View trailersLabel;
@@ -58,21 +72,20 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.movie_detail_trailers_loading_pb)
     View trailersLoading;
 
-//    @BindView(R.id.movie_detail_duration_tv)
-//    TextView durationDisplay;
+    @BindView(R.id.movie_detail_trailers_container_ll)
+    LinearLayout trailersContainer;
 
+    @BindView(R.id.movie_detail_reviews_separator_v)
+    View reviewsSeparator;
 
-    @BindView(R.id.movie_detail_rate_tv)
-    TextView rateDisplay;
+    @BindView(R.id.movie_detail_reviews_label_tv)
+    View reviewsLabel;
 
+    @BindView(R.id.movie_detail_reviews_loading_pb)
+    View reviewsLoading;
 
-    @BindView(R.id.movie_detail_overview_tv)
-    TextView overviewDisplay;
-
-    @BindString(R.string.movie_detail_rate_format)
-    String rateFormat;
-
-    private static final String YEAR_FORMAT = "yyyy";
+    @BindView(R.id.movie_detail_reviews_container_ll)
+    LinearLayout reviewsContainer;
 
 
     @Override
@@ -131,7 +144,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         // Display trailers
         Request videosRequest
-                = new GsonRequest<Video.Page>(Request.Method.GET,
+                = new GsonRequest<>(Request.Method.GET,
                 url,
                 null,
                 Video.Page.class,
@@ -153,7 +166,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                                 final Video video = videoIterator.next();
 
                                 View videoItem = getLayoutInflater()
-                                        .inflate(R.layout.item_movie_details_video, videosContainer,
+                                        .inflate(R.layout.item_movie_details_video, trailersContainer,
                                                 false);
 
                                 TextView title = videoItem
@@ -192,10 +205,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
                                     }
                                 });
 
-                                videosContainer.addView(videoItem);
+                                trailersContainer.addView(videoItem);
                             }
                         } else {
-                            trailersLabel.setVisibility(View.GONE);
+                            // Hide trailers view
+                            hideTrailersView();
                         }
 
                     }
@@ -207,7 +221,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                         // Stop loading
                         trailersLoading.setVisibility(View.GONE);
 
-                        trailersLabel.setVisibility(View.GONE);
+                        hideTrailersView();
 
                         Toast.makeText(MovieDetailsActivity.this,
                                 "Couldn't load trailers", Toast.LENGTH_LONG).show();
@@ -223,12 +237,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         String url = TMDbUtils.buildMovieReviewsUrl(movieId).toString();
 
-        // TODO Start loading
-//        trailersLoading.setVisibility(View.VISIBLE);
+        // Start loading
+        reviewsLoading.setVisibility(View.VISIBLE);
 
         // Display reviews
         Request reviewsRequest
-                = new GsonRequest<Review.Page>(Request.Method.GET,
+                = new GsonRequest<>(Request.Method.GET,
                 url,
                 null,
                 Review.Page.class,
@@ -237,8 +251,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Review.Page page) {
 
-                        // TODO Stop loading
-//                        trailersLoading.setVisibility(View.GONE);
+                        // Stop loading
+                        reviewsLoading.setVisibility(View.GONE);
 
                         Log.d(TAG, "Page: " + page);
 
@@ -254,36 +268,39 @@ public class MovieDetailsActivity extends AppCompatActivity {
                                 // Skip empty reviews
                                 if (TextUtils.isEmpty(review.getContent())) continue;
 
-                                // TODO Inflate & setup review item
-//                                View videoItem = getLayoutInflater()
-//                                        .inflate(R.layout.item_movie_details_video, videosContainer,
-//                                                false);
+                                View reviewItem = getLayoutInflater()
+                                        .inflate(R.layout.item_movie_details_review, reviewsContainer,
+                                                false);
 
                                 String author = TextUtils.isEmpty(review.getAuthor()) ?
                                         getString(R.string.movie_detail_reviews_unknown_author) :
                                         review.getAuthor();
 
-                                Toast.makeText(MovieDetailsActivity.this,
-                                        "#" + displayedCount + ": " + review.getContent(),
-                                        Toast.LENGTH_SHORT).show();
+                                TextView authorTv = reviewItem
+                                        .findViewById(R.id.movie_detail_review_item_author_tv);
+                                TextView contentTv = reviewItem
+                                        .findViewById(R.id.movie_detail_review_item_content_tv);
+
+                                authorTv.setText(author);
+                                contentTv.setText(review.getContent());
+
+                                reviewsContainer.addView(reviewItem);
 
                                 displayedCount++;
 
                                 if (!reviewIterator.hasNext() || displayedCount == MAX_REVIEWS_COUNT) {
-                                    // TODO Setup last review & exit loop
-//                                    View separator = videoItem
-//                                            .findViewById(R.id.movie_detail_video_item_separator_v);
-//                                    separator.setVisibility(View.INVISIBLE);
+                                    // Setup last review & exit loop
+                                    View separator = reviewItem
+                                            .findViewById(R.id.movie_detail_review_item_separator_v);
+                                    separator.setVisibility(View.INVISIBLE);
 
                                     break;
                                 }
                             }
 
-                            // TODO add review item to container
-//                          videosContainer.addView(videoItem);                            }
                         } else {
-                            // TODO hide reviews label
-//                          trailersLabel.setVisibility(View.GONE);
+                            // Hide reviews view
+                            hideReviewsView();
                         }
 
                     }
@@ -293,9 +310,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
 
                         // Stop loading
-                        trailersLoading.setVisibility(View.GONE);
+                        reviewsLoading.setVisibility(View.GONE);
 
-                        trailersLabel.setVisibility(View.GONE);
+                        hideReviewsView();
 
                         Toast.makeText(MovieDetailsActivity.this,
                                 "Couldn't load reviews", Toast.LENGTH_LONG).show();
@@ -305,5 +322,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 });
 
         NetworkUtils.get(MovieDetailsActivity.this).addToRequestQueue(reviewsRequest);
+    }
+
+    private void hideTrailersView() {
+        trailersSeparator.setVisibility(View.GONE);
+        trailersLabel.setVisibility(View.GONE);
+        trailersContainer.setVisibility(View.GONE);
+    }
+
+    private void hideReviewsView() {
+        reviewsSeparator.setVisibility(View.GONE);
+        reviewsLabel.setVisibility(View.GONE);
+        reviewsContainer.setVisibility(View.GONE);
     }
 }

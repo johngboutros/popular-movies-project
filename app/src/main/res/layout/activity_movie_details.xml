@@ -80,6 +80,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/movie_detail_overview_tv" />
 
+        <!--Trailers-->
         <TextView
             android:id="@+id/movie_detail_trailers_label_tv"
             android:layout_width="0dp"
@@ -99,19 +100,64 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/discovery_item_loading_height"
             android:layout_margin="@dimen/discovery_item_loading_margin"
-            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/movie_detail_trailers_label_tv" />
 
         <LinearLayout
-            android:id="@+id/movie_detail_videos_container_ll"
+            android:id="@+id/movie_detail_trailers_container_ll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/movie_detail_trailers_label_tv">
+            app:layout_constraintTop_toBottomOf="@id/movie_detail_trailers_loading_pb">
+
+        </LinearLayout>
+
+        <!--Horizontal Separator-->
+        <View
+            android:id="@+id/movie_detail_reviews_separator_v"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/movie_detail_separator_thickness"
+            android:layout_margin="@dimen/movie_detail_separator_margin"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/movie_detail_trailers_container_ll" />
+
+        <!--Reviews-->
+        <TextView
+            android:id="@+id/movie_detail_reviews_label_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/movie_detail_row_margin_h"
+            android:layout_marginStart="@dimen/movie_detail_row_margin_h"
+            android:layout_marginTop="@dimen/movie_detail_row_margin_top"
+            android:text="@string/movie_detail_reviews_label"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+            android:textSize="@dimen/movie_detail_paragraph_text_size"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/movie_detail_reviews_separator_v" />
+
+        <ProgressBar
+            android:id="@+id/movie_detail_reviews_loading_pb"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/discovery_item_loading_height"
+            android:layout_margin="@dimen/discovery_item_loading_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/movie_detail_reviews_label_tv" />
+
+        <LinearLayout
+            android:id="@+id/movie_detail_reviews_container_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/movie_detail_reviews_loading_pb">
 
         </LinearLayout>
 
