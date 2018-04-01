@@ -5,7 +5,7 @@ android {
     buildToolsVersion "27.0.3"
     defaultConfig {
         applicationId "com.example.android.popularmovies"
-        minSdkVersion 14
+        minSdkVersion 15
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -47,6 +47,9 @@ dependencies {
 
     compile 'org.parceler:parceler-api:1.1.9'
     annotationProcessor 'org.parceler:parceler:1.1.9'
+
+    annotationProcessor 'net.simonvt.schematic:schematic-compiler:0.7.0'
+    compile 'net.simonvt.schematic:schematic:0.7.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
