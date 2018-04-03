@@ -14,6 +14,13 @@ import net.simonvt.schematic.annotation.TableEndpoint;
 @ContentProvider(authority = FavoritesProvider.AUTHORITY, database = FavoritesDatabase.class)
 public final class FavoritesProvider {
 
+    // TODO Switch to an ORM
+    // https://github.com/codepath/android_guides/wiki/Must-Have-libraries#persistence
+    // https://developer.android.com/topic/libraries/architecture/room.html
+    // http://www.vertabelo.com/blog/technical-articles/a-comparison-of-android-orms
+    // https://github.com/AlexeyZatsepin/Android-ORM-benchmark
+    // https://github.com/greenrobot/greenDAO http://greenrobot.org/greendao/
+
     private FavoritesProvider(){
     }
 

@@ -27,5 +27,6 @@
     <string name="movie_detail_video_not_supported">Video not supported</string>
     <string name="movie_detail_reviews_label">Reviews:</string>
     <string name="movie_detail_reviews_unknown_author">Anonymous</string>
+    <string name="movie_detail_favorite_button">Add to\nfavorites</string>
 
 </resources>
