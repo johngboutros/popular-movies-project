@@ -1,5 +1,6 @@
 package com.example.android.popularmovies;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,6 +17,8 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.example.android.popularmovies.data.FavoritesDatabase;
+import com.example.android.popularmovies.data.FavoritesProvider;
 import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.data.Review;
 import com.example.android.popularmovies.data.Video;
@@ -334,5 +337,21 @@ public class MovieDetailsActivity extends AppCompatActivity {
         reviewsSeparator.setVisibility(View.GONE);
         reviewsLabel.setVisibility(View.GONE);
         reviewsContainer.setVisibility(View.GONE);
+    }
+
+    // TODO Test Me!
+    private void addToFavorites() {
+
+        Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
+
+        ContentValues cv = new ContentValues();
+        cv.put(FavoritesDatabase.FavoriteColumns.UID, movie.getId());
+        cv.put(FavoritesDatabase.FavoriteColumns.TITLE, movie.getTitle());
+        cv.put(FavoritesDatabase.FavoriteColumns.POSTER_PATH, movie.getPosterPath());
+        cv.put(FavoritesDatabase.FavoriteColumns.OVERVIEW, movie.getOverview());
+        cv.put(FavoritesDatabase.FavoriteColumns.RELEASE_DATE, movie.getReleaseDate());
+        cv.put(FavoritesDatabase.FavoriteColumns.VOTE_AVERAGE, movie.getVoteAverage());
+        Uri newUri = getApplicationContext().getContentResolver()
+                .insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
     }
 }
