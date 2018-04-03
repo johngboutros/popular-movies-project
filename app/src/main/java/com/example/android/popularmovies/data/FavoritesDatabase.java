@@ -27,6 +27,9 @@ import static net.simonvt.schematic.annotation.DataType.Type.TEXT;
 @Database(version = FavoritesDatabase.VERSION)
 public final class FavoritesDatabase {
 
+    private FavoritesDatabase() {
+    }
+
     public static final int VERSION = 1;
 
     @Table(FavoriteColumns.class)
