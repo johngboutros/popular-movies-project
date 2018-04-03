@@ -58,8 +58,8 @@ public class Movie  {
 
     @Parcel
     public static class Genre {
-        private Integer id;
-        private String name;
+        Integer id;
+        String name;
 
         public Integer getId() {
             return id;

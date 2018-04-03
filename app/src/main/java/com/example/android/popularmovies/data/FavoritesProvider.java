@@ -1,8 +1,6 @@
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.data;
 
 import android.net.Uri;
-
-import com.example.android.popularmovies.data.FavoritesDatabase;
 
 import net.simonvt.schematic.annotation.ContentProvider;
 import net.simonvt.schematic.annotation.ContentUri;
