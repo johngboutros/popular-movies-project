@@ -2,6 +2,7 @@ package com.example.android.popularmovies;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -35,6 +36,7 @@ import java.util.Iterator;
 import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MovieDetailsActivity extends AppCompatActivity {
 
@@ -227,7 +229,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
                         hideTrailersView();
 
                         Toast.makeText(MovieDetailsActivity.this,
-                                "Couldn't load trailers", Toast.LENGTH_LONG).show();
+                                getString(R.string.movie_detail_load_trailers_error),
+                                Toast.LENGTH_LONG).show();
 
                         Log.e(TAG, "VolleyError: " + error.getMessage());
                     }
@@ -318,7 +321,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
                         hideReviewsView();
 
                         Toast.makeText(MovieDetailsActivity.this,
-                                "Couldn't load reviews", Toast.LENGTH_LONG).show();
+                                getString(R.string.movie_detail_load_reviews_error),
+                                Toast.LENGTH_LONG).show();
 
                         Log.e(TAG, "VolleyError: " + error.getMessage());
                     }
@@ -339,10 +343,29 @@ public class MovieDetailsActivity extends AppCompatActivity {
         reviewsContainer.setVisibility(View.GONE);
     }
 
-    // TODO Test Me!
-    private void addToFavorites() {
+    @OnClick(R.id.movie_detail_favorite_btn)
+    void favoriteClicked() {
 
         Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
+
+        // TODO move to a method retrieves full movie data
+        Cursor cursor = getApplicationContext().getContentResolver()
+                .query(FavoritesProvider.Favorites.withUid(movie.getId()),
+                        new String[]{FavoritesDatabase.FavoriteColumns.UID},
+                        null,
+                        null,
+                        null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            removeFromFavorites(movie);
+        } else {
+            addToFavorites(movie);
+        }
+
+    }
+
+    // TODO Test Me!
+    private void addToFavorites(Movie movie) {
 
         ContentValues cv = new ContentValues();
         cv.put(FavoritesDatabase.FavoriteColumns.UID, movie.getId());
@@ -353,5 +376,24 @@ public class MovieDetailsActivity extends AppCompatActivity {
         cv.put(FavoritesDatabase.FavoriteColumns.VOTE_AVERAGE, movie.getVoteAverage());
         Uri newUri = getApplicationContext().getContentResolver()
                 .insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
+
+
+        Toast.makeText(MovieDetailsActivity.this,
+                String.format(getString(R.string.movie_detail_favorite_added), movie.getTitle()),
+                Toast.LENGTH_LONG).show();
+    }
+
+    // TODO Test Me!
+    private void removeFromFavorites(Movie movie) {
+        int count = getApplicationContext().getContentResolver()
+                .delete(FavoritesProvider.Favorites.withUid(movie.getId()),
+                        null, null);
+
+        if (count > 0) {
+            Toast.makeText(MovieDetailsActivity.this,
+                    String.format(getString(R.string.movie_detail_favorite_removed),
+                            movie.getTitle()),
+                    Toast.LENGTH_LONG).show();
+        }
     }
 }

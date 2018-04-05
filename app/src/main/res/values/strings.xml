@@ -28,5 +28,9 @@
     <string name="movie_detail_reviews_label">Reviews:</string>
     <string name="movie_detail_reviews_unknown_author">Anonymous</string>
     <string name="movie_detail_favorite_button">Add to\nfavorites</string>
+    <string name="movie_detail_load_trailers_error">Couldn\'t load trailers</string>
+    <string name="movie_detail_load_reviews_error">Couldn\'t load reviews</string>
+    <string name="movie_detail_favorite_added">%s added to favorites</string>
+    <string name="movie_detail_favorite_removed">%s removed from favorites</string>
 
 </resources>
