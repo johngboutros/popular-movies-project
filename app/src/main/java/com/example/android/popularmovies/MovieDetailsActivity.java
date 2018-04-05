@@ -1,8 +1,6 @@
 package com.example.android.popularmovies;
 
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,8 +16,6 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.example.android.popularmovies.data.FavoritesDatabase;
-import com.example.android.popularmovies.data.FavoritesProvider;
 import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.data.Review;
 import com.example.android.popularmovies.data.Video;
@@ -349,51 +345,51 @@ public class MovieDetailsActivity extends AppCompatActivity {
         Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
 
         // TODO move to a method retrieves full movie data
-        Cursor cursor = getApplicationContext().getContentResolver()
-                .query(FavoritesProvider.Favorites.withUid(movie.getId()),
-                        new String[]{FavoritesDatabase.FavoriteColumns.UID},
-                        null,
-                        null,
-                        null);
-
-        if (cursor != null && cursor.moveToFirst()) {
-            removeFromFavorites(movie);
-        } else {
-            addToFavorites(movie);
-        }
+//        Cursor cursor = getApplicationContext().getContentResolver()
+//                .query(FavoritesProvider.Favorites.withUid(movie.getId()),
+//                        new String[]{FavoritesDatabase.FavoriteColumns.UID},
+//                        null,
+//                        null,
+//                        null);
+//
+//        if (cursor != null && cursor.moveToFirst()) {
+//            removeFromFavorites(movie);
+//        } else {
+//            addToFavorites(movie);
+//        }
 
     }
 
     // TODO Test Me!
     private void addToFavorites(Movie movie) {
 
-        ContentValues cv = new ContentValues();
-        cv.put(FavoritesDatabase.FavoriteColumns.UID, movie.getId());
-        cv.put(FavoritesDatabase.FavoriteColumns.TITLE, movie.getTitle());
-        cv.put(FavoritesDatabase.FavoriteColumns.POSTER_PATH, movie.getPosterPath());
-        cv.put(FavoritesDatabase.FavoriteColumns.OVERVIEW, movie.getOverview());
-        cv.put(FavoritesDatabase.FavoriteColumns.RELEASE_DATE, movie.getReleaseDate());
-        cv.put(FavoritesDatabase.FavoriteColumns.VOTE_AVERAGE, movie.getVoteAverage());
-        Uri newUri = getApplicationContext().getContentResolver()
-                .insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
+//        ContentValues cv = new ContentValues();
+//        cv.put(FavoritesDatabase.FavoriteColumns.UID, movie.getId());
+//        cv.put(FavoritesDatabase.FavoriteColumns.TITLE, movie.getTitle());
+//        cv.put(FavoritesDatabase.FavoriteColumns.POSTER_PATH, movie.getPosterPath());
+//        cv.put(FavoritesDatabase.FavoriteColumns.OVERVIEW, movie.getOverview());
+//        cv.put(FavoritesDatabase.FavoriteColumns.RELEASE_DATE, movie.getReleaseDate());
+//        cv.put(FavoritesDatabase.FavoriteColumns.VOTE_AVERAGE, movie.getVoteAverage());
+//        Uri newUri = getApplicationContext().getContentResolver()
+//                .insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
 
 
-        Toast.makeText(MovieDetailsActivity.this,
-                String.format(getString(R.string.movie_detail_favorite_added), movie.getTitle()),
-                Toast.LENGTH_LONG).show();
+//        Toast.makeText(MovieDetailsActivity.this,
+//                String.format(getString(R.string.movie_detail_favorite_added), movie.getTitle()),
+//                Toast.LENGTH_LONG).show();
     }
 
     // TODO Test Me!
     private void removeFromFavorites(Movie movie) {
-        int count = getApplicationContext().getContentResolver()
-                .delete(FavoritesProvider.Favorites.withUid(movie.getId()),
-                        null, null);
+//        int count = getApplicationContext().getContentResolver()
+//                .delete(FavoritesProvider.Favorites.withUid(movie.getId()),
+//                        null, null);
 
-        if (count > 0) {
-            Toast.makeText(MovieDetailsActivity.this,
-                    String.format(getString(R.string.movie_detail_favorite_removed),
-                            movie.getTitle()),
-                    Toast.LENGTH_LONG).show();
-        }
+//        if (count > 0) {
+//            Toast.makeText(MovieDetailsActivity.this,
+//                    String.format(getString(R.string.movie_detail_favorite_removed),
+//                            movie.getTitle()),
+//                    Toast.LENGTH_LONG).show();
+//        }
     }
 }

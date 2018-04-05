@@ -1,5 +1,9 @@
 package com.example.android.popularmovies.data;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.google.gson.annotations.SerializedName;
 
 import org.parceler.Parcel;
@@ -10,6 +14,8 @@ import java.util.List;
 /**
  * Created by john on 03/03/18.
  */
+
+@Entity
 @Parcel
 public class Movie  {
 
@@ -32,27 +38,57 @@ public class Movie  {
     //  video               boolean             optional
     //  vote_average        number              optional
 
+    public interface Columns {
+        String UID = "id";
+        String TITLE = "title";
+        String POSTER_PATH = "poster_path";
+        String OVERVIEW = "overview";
+        String RELEASE_DATE = "release_date";
+        String VOTE_AVERAGE = "voteAverage";
+        String CREATION_DATE = "creationDate";
+    }
+
+    @ColumnInfo(name = Columns.POSTER_PATH)
     @SerializedName("poster_path")
     String posterPath;
+
     boolean adult;
+
+    @ColumnInfo(name = Columns.OVERVIEW)
     String overview;
+
+    @ColumnInfo(name = Columns.RELEASE_DATE)
     @SerializedName("release_date")
     String releaseDate;
+
     @SerializedName("genre_ids")
     List<Integer> genreIds;
+
     List<Genre> genres;
+
+    @PrimaryKey
     Integer id;
+
     @SerializedName("original_title")
     String originalTitle;
+
     @SerializedName("original_language")
     String originalLanguage;
+
+    @ColumnInfo(name = Columns.TITLE)
     String title;
+
     @SerializedName("backdrop_path")
     String backdropPath;
+
     float popularity;
+
     @SerializedName("vote_count")
     Integer voteCount;
+
     boolean video;
+
+    @ColumnInfo(name = Columns.VOTE_AVERAGE)
     @SerializedName("vote_average")
     float voteAverage;
 
