@@ -399,6 +399,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
     // TODO Test Me!
     private void addToFavorites(@NonNull final Movie movie) {
 
+        // Disable button
+        favoriteButton.setEnabled(false);
+
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -407,11 +410,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
                         favorite = movie;
-
                         setupFavorite(true);
-
+                        // Enable button
+                        favoriteButton.setEnabled(true);
                         Toast.makeText(MovieDetailsActivity.this,
                                 String.format(getString(R.string.movie_detail_favorite_added), movie.getTitle()),
                                 Toast.LENGTH_LONG).show();
@@ -434,6 +436,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     // TODO Test Me!
     private void removeFromFavorites(@NonNull final Movie movie) {
+
+        // Disable button
+        favoriteButton.setEnabled(false);
+
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -443,9 +449,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         favorite = null;
-
                         setupFavorite(false);
-
+                        // Enable button
+                        favoriteButton.setEnabled(true);
                         Toast.makeText(MovieDetailsActivity.this,
                                 String.format(getString(R.string.movie_detail_favorite_removed),
                                         movie.getTitle()),
