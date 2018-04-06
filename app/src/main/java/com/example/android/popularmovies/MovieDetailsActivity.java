@@ -1,13 +1,16 @@
 package com.example.android.popularmovies;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,6 +19,8 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.example.android.popularmovies.data.FavoritesDao;
+import com.example.android.popularmovies.data.FavoritesDatabase;
 import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.data.Review;
 import com.example.android.popularmovies.data.Video;
@@ -88,6 +93,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.movie_detail_reviews_container_ll)
     LinearLayout reviewsContainer;
 
+    @BindView(R.id.movie_detail_favorite_btn)
+    Button favoriteButton;
+
+    private FavoritesDao favoritesDao;
+
+    // Not null if this movie was saved as favorite
+    private Movie favorite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +107,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_details);
         ButterKnife.bind(this);
 
-        Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
+        favoritesDao = FavoritesDatabase.get(this).favoritesDao();
+
+        final Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
 
         // Load videos
         loadVideos(movie.getId());
@@ -134,6 +148,23 @@ public class MovieDetailsActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(movie.getOverview())) {
             overviewDisplay.setText(movie.getOverview());
         }
+
+        // Load favorite movie if exists
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                favorite = favoritesDao.get(movie.getId());
+
+                // Setup favorite view if exists
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setupFavorite(favorite != null);
+                    }
+                });
+
+            }
+        });
     }
 
     private void loadVideos(@NonNull Integer movieId) {
@@ -342,7 +373,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @OnClick(R.id.movie_detail_favorite_btn)
     void favoriteClicked() {
 
-        Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
+        if (favorite != null) {
+            removeFromFavorites(favorite);
+        } else {
+            Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
+            addToFavorites(movie);
+        }
 
         // TODO move to a method retrieves full movie data
 //        Cursor cursor = getApplicationContext().getContentResolver()
@@ -361,7 +397,28 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
     // TODO Test Me!
-    private void addToFavorites(Movie movie) {
+    private void addToFavorites(@NonNull final Movie movie) {
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                favoritesDao.insert(movie);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        favorite = movie;
+
+                        setupFavorite(true);
+
+                        Toast.makeText(MovieDetailsActivity.this,
+                                String.format(getString(R.string.movie_detail_favorite_added), movie.getTitle()),
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
 
 //        ContentValues cv = new ContentValues();
 //        cv.put(FavoritesDatabase.FavoriteColumns.UID, movie.getId());
@@ -373,14 +430,31 @@ public class MovieDetailsActivity extends AppCompatActivity {
 //        Uri newUri = getApplicationContext().getContentResolver()
 //                .insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
 
-
-//        Toast.makeText(MovieDetailsActivity.this,
-//                String.format(getString(R.string.movie_detail_favorite_added), movie.getTitle()),
-//                Toast.LENGTH_LONG).show();
     }
 
     // TODO Test Me!
-    private void removeFromFavorites(Movie movie) {
+    private void removeFromFavorites(@NonNull final Movie movie) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                favoritesDao.delete(movie);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        favorite = null;
+
+                        setupFavorite(false);
+
+                        Toast.makeText(MovieDetailsActivity.this,
+                                String.format(getString(R.string.movie_detail_favorite_removed),
+                                        movie.getTitle()),
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+
 //        int count = getApplicationContext().getContentResolver()
 //                .delete(FavoritesProvider.Favorites.withUid(movie.getId()),
 //                        null, null);
@@ -391,5 +465,18 @@ public class MovieDetailsActivity extends AppCompatActivity {
 //                            movie.getTitle()),
 //                    Toast.LENGTH_LONG).show();
 //        }
+    }
+
+    private void setupFavorite(boolean isFavorite) {
+        // TODO
+        if (isFavorite) {
+            favoriteButton.setText(getString(R.string.movie_detail_favorite_button_added));
+            favoriteButton.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+            favoriteButton.setTextColor(Color.WHITE);
+        } else {
+            favoriteButton.setText(getString(R.string.movie_detail_favorite_button));
+            favoriteButton.setBackgroundColor(Color.LTGRAY);
+            favoriteButton.setTextColor(Color.BLACK);
+        }
     }
 }

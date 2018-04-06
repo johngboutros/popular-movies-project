@@ -2,20 +2,22 @@ package com.example.android.popularmovies.data;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
+import com.example.android.popularmovies.data.FavoritesDao.Columns;
 import com.google.gson.annotations.SerializedName;
 
 import org.parceler.Parcel;
 
-import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Created by john on 03/03/18.
  */
 
-@Entity
+@Entity(tableName = FavoritesDao.TABLE_NAME)
 @Parcel
 public class Movie  {
 
@@ -38,16 +40,6 @@ public class Movie  {
     //  video               boolean             optional
     //  vote_average        number              optional
 
-    public interface Columns {
-        String UID = "id";
-        String TITLE = "title";
-        String POSTER_PATH = "poster_path";
-        String OVERVIEW = "overview";
-        String RELEASE_DATE = "release_date";
-        String VOTE_AVERAGE = "voteAverage";
-        String CREATION_DATE = "creationDate";
-    }
-
     @ColumnInfo(name = Columns.POSTER_PATH)
     @SerializedName("poster_path")
     String posterPath;
@@ -61,28 +53,36 @@ public class Movie  {
     @SerializedName("release_date")
     String releaseDate;
 
+    @Ignore
     @SerializedName("genre_ids")
     List<Integer> genreIds;
 
+    @Ignore
     List<Genre> genres;
 
     @PrimaryKey
+    @ColumnInfo(name = Columns.UID)
     Integer id;
 
+    @Ignore
     @SerializedName("original_title")
     String originalTitle;
 
+    @Ignore
     @SerializedName("original_language")
     String originalLanguage;
 
     @ColumnInfo(name = Columns.TITLE)
     String title;
 
+    @Ignore
     @SerializedName("backdrop_path")
     String backdropPath;
 
+    @Ignore
     float popularity;
 
+    @Ignore
     @SerializedName("vote_count")
     Integer voteCount;
 
@@ -91,6 +91,9 @@ public class Movie  {
     @ColumnInfo(name = Columns.VOTE_AVERAGE)
     @SerializedName("vote_average")
     float voteAverage;
+
+    @ColumnInfo(name = Columns.CREATION_DATE)
+    Date creationDate = new Date();
 
     @Parcel
     public static class Genre {
@@ -130,9 +133,12 @@ public class Movie  {
         // total_pages     integer         optional
 
         private Integer page;
+
         private List<Movie> results;
+
         @SerializedName("total_results")
         private Integer totalResults;
+
         @SerializedName("total_pages")
         private Integer totalPages;
 
@@ -303,6 +309,14 @@ public class Movie  {
         this.voteAverage = voteAverage;
     }
 
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
     @Override
     public String toString() {
         return "Movie{" +
@@ -321,6 +335,7 @@ public class Movie  {
                 ", voteCount=" + voteCount +
                 ", video=" + video +
                 ", voteAverage=" + voteAverage +
+                ", creationDate=" + creationDate +
                 '}';
     }
 }

@@ -27,10 +27,9 @@
             android:id="@+id/movie_detail_year_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/movie_detail_aside_margin_left"
-            android:layout_marginStart="@dimen/movie_detail_aside_margin_left"
             android:layout_marginTop="@dimen/movie_detail_aside_margin_top"
             android:textSize="@dimen/movie_detail_year_text_size"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/movie_detail_image_iv"
             app:layout_constraintTop_toTopOf="@+id/movie_detail_image_iv"
             tools:text="2015" />
