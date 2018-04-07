@@ -379,24 +379,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
             Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
             addToFavorites(movie);
         }
-
-        // TODO move to a method retrieves full movie data
-//        Cursor cursor = getApplicationContext().getContentResolver()
-//                .query(FavoritesProvider.Favorites.withUid(movie.getId()),
-//                        new String[]{FavoritesDatabase.FavoriteColumns.UID},
-//                        null,
-//                        null,
-//                        null);
-//
-//        if (cursor != null && cursor.moveToFirst()) {
-//            removeFromFavorites(movie);
-//        } else {
-//            addToFavorites(movie);
-//        }
-
     }
 
-    // TODO Test Me!
     private void addToFavorites(@NonNull final Movie movie) {
 
         // Disable button
@@ -416,25 +400,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
                         favoriteButton.setEnabled(true);
                         Toast.makeText(MovieDetailsActivity.this,
                                 String.format(getString(R.string.movie_detail_favorite_added), movie.getTitle()),
-                                Toast.LENGTH_LONG).show();
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         });
-
-//        ContentValues cv = new ContentValues();
-//        cv.put(FavoritesDatabase.FavoriteColumns.UID, movie.getId());
-//        cv.put(FavoritesDatabase.FavoriteColumns.TITLE, movie.getTitle());
-//        cv.put(FavoritesDatabase.FavoriteColumns.POSTER_PATH, movie.getPosterPath());
-//        cv.put(FavoritesDatabase.FavoriteColumns.OVERVIEW, movie.getOverview());
-//        cv.put(FavoritesDatabase.FavoriteColumns.RELEASE_DATE, movie.getReleaseDate());
-//        cv.put(FavoritesDatabase.FavoriteColumns.VOTE_AVERAGE, movie.getVoteAverage());
-//        Uri newUri = getApplicationContext().getContentResolver()
-//                .insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
-
     }
 
-    // TODO Test Me!
     private void removeFromFavorites(@NonNull final Movie movie) {
 
         // Disable button
@@ -455,26 +427,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
                         Toast.makeText(MovieDetailsActivity.this,
                                 String.format(getString(R.string.movie_detail_favorite_removed),
                                         movie.getTitle()),
-                                Toast.LENGTH_LONG).show();
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         });
-
-//        int count = getApplicationContext().getContentResolver()
-//                .delete(FavoritesProvider.Favorites.withUid(movie.getId()),
-//                        null, null);
-
-//        if (count > 0) {
-//            Toast.makeText(MovieDetailsActivity.this,
-//                    String.format(getString(R.string.movie_detail_favorite_removed),
-//                            movie.getTitle()),
-//                    Toast.LENGTH_LONG).show();
-//        }
     }
 
     private void setupFavorite(boolean isFavorite) {
-        // TODO
         if (isFavorite) {
             favoriteButton.setText(getString(R.string.movie_detail_favorite_button_added));
             favoriteButton.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
