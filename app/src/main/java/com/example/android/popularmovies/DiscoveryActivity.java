@@ -1,11 +1,14 @@
 package com.example.android.popularmovies;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -411,25 +414,24 @@ public class DiscoveryActivity extends AppCompatActivity {
             discoveryAdapter.startLoading();
         }
 
-        AsyncTask.execute(new Runnable() {
+        LiveData<List<Movie>> favorites = favoritesDao.getAllAsync();
+
+        favorites.observe(this, new Observer<List<Movie>>() {
             @Override
-            public void run() {
+            public void onChanged(@Nullable List<Movie> movies) {
 
-                final List<Movie> favorites = favoritesDao.getAll();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+                if (!currentSortOption.equals(SortOption.FAVORITS))
+                    return;
 
-                        if (isLoading) {
-                            isLoading = false;
-                            discoveryAdapter.stopLoading();
-                        }
+                if (isLoading) {
+                    isLoading = false;
+                    discoveryAdapter.stopLoading();
+                }
 
-                        Log.d(TAG, "Favorites loaded, size: " + favorites.size());
+                Log.d(TAG, "Favorites loaded, size: " + movies.size());
 
-                        discoveryAdapter.addAll(favorites);
-                    }
-                });
+                discoveryAdapter.setMovies(movies);
+                discoveryAdapter.notifyDataSetChanged();
             }
         });
     }

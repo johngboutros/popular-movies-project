@@ -398,4 +398,8 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     public void removeMovieClickListener(MovieClickListener listener) {
         movieClickListeners.remove(listener);
     }
+
+    public void setMovies(List<Movie> movies) {
+        this.movies = movies;
+    }
 }
