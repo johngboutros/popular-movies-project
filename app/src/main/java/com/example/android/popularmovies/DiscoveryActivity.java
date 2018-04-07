@@ -2,6 +2,7 @@ package com.example.android.popularmovies;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
@@ -19,6 +20,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.example.android.popularmovies.DiscoveryAdapter.MovieClickListener;
 import com.example.android.popularmovies.components.PaginationScrollListener;
+import com.example.android.popularmovies.data.FavoritesDao;
+import com.example.android.popularmovies.data.FavoritesDatabase;
 import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.utilities.GsonRequest;
 import com.example.android.popularmovies.utilities.NetworkUtils;
@@ -43,7 +46,7 @@ public class DiscoveryActivity extends AppCompatActivity {
      * Available sort options provided by the adapter
      */
     public enum SortOption {
-        POPULARITY, TOP_RATED, RELEASE_DATE, REVENUE
+        POPULARITY, TOP_RATED, RELEASE_DATE, REVENUE, FAVORITS
     }
 
     @BindView(R.id.discovery_list_rv)
@@ -55,22 +58,20 @@ public class DiscoveryActivity extends AppCompatActivity {
     @BindString(R.string.pref_discovery_sort_key)
     String sortPrefKey;
 
-
     @BindString(R.string.pref_discovery_sort_popularity)
     String sortPrefPopularity;
-
 
     @BindString(R.string.pref_discovery_sort_top_rated)
     String sortPrefTopRated;
 
-
     @BindString(R.string.pref_discovery_sort_release_date)
     String sortPrefReleaseDate;
-
 
     @BindString(R.string.pref_discovery_sort_revenue)
     String sortPrefRevenue;
 
+    @BindString(R.string.pref_discovery_sort_favorites)
+    String sortPrefFavorites;
 
     @BindString(R.string.pref_discovery_sort_default)
     String sortPrefDefault;
@@ -105,12 +106,18 @@ public class DiscoveryActivity extends AppCompatActivity {
     // Scroll listener
     private ScrollListener scrollListener;
 
+    // Favorites DAO
+    private FavoritesDao favoritesDao;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_discovery);
         ButterKnife.bind(this);
+
+        favoritesDao = FavoritesDatabase.get(this).favoritesDao();
 
         discoveryRecyclerView.setHasFixedSize(true);
         GridLayoutManager layoutManager = new GridLayoutManager(this, gridColumns);
@@ -241,6 +248,10 @@ public class DiscoveryActivity extends AppCompatActivity {
                 saveSortPreferences(R.string.pref_discovery_sort_revenue);
                 break;
 
+            case R.id.menu_favorites:
+                saveSortPreferences(R.string.pref_discovery_sort_favorites);
+                break;
+
         }
 
         loadSortPreferences();
@@ -274,6 +285,9 @@ public class DiscoveryActivity extends AppCompatActivity {
         } else if (sortPrefRevenue.equals(preferenceValue)) {
             setTitle(R.string.highest_grossing_movies);
             discoverMore(SortOption.REVENUE);
+        } else if (sortPrefFavorites.equals(preferenceValue)) {
+            setTitle(R.string.menu_favorites);
+            discoverMore(SortOption.FAVORITS);
         }
 
     }
@@ -312,6 +326,7 @@ public class DiscoveryActivity extends AppCompatActivity {
             }
             discoveryAdapter.clear();
             pageCount = 0;
+            totalPageCount = 0;
         }
 
         Integer page = pageCount > 0 ? pageCount + 1 : null;
@@ -319,22 +334,32 @@ public class DiscoveryActivity extends AppCompatActivity {
         String url = null;
 
         switch (this.currentSortOption) {
+            case FAVORITS:
+                loadFavorites();
+                break;
             case POPULARITY:
                 url = TMDbUtils.buildPopularMoviesURL(page).toString();
+                loadUrl(url);
                 break;
             case TOP_RATED:
                 url = TMDbUtils.buildTopRatedMoviesURL(page).toString();
+                loadUrl(url);
                 break;
             case RELEASE_DATE:
                 url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.RELEASE_DATE, page).toString();
+                loadUrl(url);
                 break;
             case REVENUE:
                 url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.REVENUE, page).toString();
+                loadUrl(url);
                 break;
             default:
                 url = TMDbUtils.buildDiscoveryUrl(TMDbUtils.SortBy.POPULARITY, page).toString();
+                loadUrl(url);
         }
+    }
 
+    private void loadUrl(String url) {
         if (!isLoading) {
             isLoading = true;
             discoveryAdapter.startLoading();
@@ -377,6 +402,36 @@ public class DiscoveryActivity extends AppCompatActivity {
                 });
 
         NetworkUtils.get(DiscoveryActivity.this).addToRequestQueue(movieRequest);
+    }
+
+    private void loadFavorites() {
+
+        if (!isLoading) {
+            isLoading = true;
+            discoveryAdapter.startLoading();
+        }
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                final List<Movie> favorites = favoritesDao.getAll();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (isLoading) {
+                            isLoading = false;
+                            discoveryAdapter.stopLoading();
+                        }
+
+                        Log.d(TAG, "Favorites loaded, size: " + favorites.size());
+
+                        discoveryAdapter.addAll(favorites);
+                    }
+                });
+            }
+        });
     }
 
     /**

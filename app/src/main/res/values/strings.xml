@@ -4,6 +4,7 @@
     <string name="sort_by_top_rated">Sort by Top rated</string>
     <string name="sort_by_release_date">Sort by Release date</string>
     <string name="sort_by_revenue">Sort by Revenue</string>
+    <string name="menu_favorites">Favorites</string>
     <string name="popular_movies">Most Popular Movies</string>
     <string name="top_rated_movies">Top Rated Movies</string>
     <string name="recently_released_movies">Recently Released Movies</string>
@@ -15,6 +16,7 @@
     <string name="pref_discovery_sort_top_rated" translatable="false">top_rated</string>
     <string name="pref_discovery_sort_release_date" translatable="false">release_date</string>
     <string name="pref_discovery_sort_revenue" translatable="false">revenue</string>
+    <string name="pref_discovery_sort_favorites" translatable="false">favorites</string>
     <string name="pref_discovery_sort_default" translatable="false">@string/pref_discovery_sort_popularity</string>
 
     <!--Discovery-->
