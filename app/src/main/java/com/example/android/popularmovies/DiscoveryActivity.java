@@ -431,7 +431,7 @@ public class DiscoveryActivity extends AppCompatActivity {
                 Log.d(TAG, "Favorites loaded, size: " + movies.size());
 
                 discoveryAdapter.setMovies(movies);
-                discoveryAdapter.notifyDataSetChanged();
+
             }
         });
     }

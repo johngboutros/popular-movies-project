@@ -401,5 +401,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
 
     public void setMovies(List<Movie> movies) {
         this.movies = movies;
+        notifyDataSetChanged();
     }
 }
