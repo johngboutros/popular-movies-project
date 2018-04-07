@@ -28,13 +28,14 @@ public interface FavoritesDao {
         String CREATION_DATE = "creation_date";
     }
 
-    @Query("SELECT * FROM " + TABLE_NAME)
+    @Query("SELECT * FROM " + TABLE_NAME + " ORDER BY " + Columns.CREATION_DATE + " DESC")
     List<Movie> getAll();
 
-    @Query("SELECT * FROM " + TABLE_NAME)
+    @Query("SELECT * FROM " + TABLE_NAME + " ORDER BY " + Columns.CREATION_DATE + " DESC")
     LiveData<List<Movie>> getAllAsync();
 
-    @Query("SELECT * FROM " + TABLE_NAME + " LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM " + TABLE_NAME + " ORDER BY " + Columns.CREATION_DATE + " DESC "
+            + " LIMIT :limit OFFSET :offset")
     List<Movie> getAll(int limit, int offset);
 
     @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + Columns.UID + " = :movieId")
