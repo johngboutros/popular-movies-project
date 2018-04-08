@@ -6,9 +6,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -101,6 +104,18 @@ public class MovieDetailsActivity extends AppCompatActivity {
     // Not null if this movie was saved as favorite
     private Movie favorite;
 
+    // Share menu-item's ActionProvider
+    // private ShareActionProvider shareActionProvider;
+
+    // Share text (first trailer link if exists)
+    // private String shareTrailerUrl;
+
+    // Share text (first trailer link if exists)
+    private String shareText;
+
+    // Year format
+    private final SimpleDateFormat yearFormat = new SimpleDateFormat(YEAR_FORMAT);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,10 +127,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
         final Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
 
         // Load videos
-        loadVideos(movie.getId());
+        loadVideos(movie);
 
         // Load reviews
-        loadReviews(movie.getId());
+        loadReviews(movie);
 
         setTitle(movie.getTitle());
 
@@ -135,8 +150,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
 
         if (!TextUtils.isEmpty(movie.getReleaseDate())) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat(YEAR_FORMAT);
-            yearDisplay.setText(dateFormat.format(TMDbUtils.parseDate(movie.getReleaseDate())));
+            yearDisplay.setText(yearFormat.format(TMDbUtils.parseDate(movie.getReleaseDate())));
         }
 
         if (movie.getVoteAverage() > 0) {
@@ -167,9 +181,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         });
     }
 
-    private void loadVideos(@NonNull Integer movieId) {
+    private void loadVideos(@NonNull final Movie movie) {
 
-        String url = TMDbUtils.buildMovieVideosUrl(movieId).toString();
+        String url = TMDbUtils.buildMovieVideosUrl(movie.getId()).toString();
 
         // Start loading
         trailersLoading.setVisibility(View.VISIBLE);
@@ -197,6 +211,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
                             while (videoIterator.hasNext()) {
                                 final Video video = videoIterator.next();
 
+                                final Uri webpage = TMDbUtils.buildYoutubeUri(video.getKey());
+
+                                if (shareText == null && webpage != null) {
+                                    // Share text (first trailer link if exists)
+                                    shareText = webpage.toString();
+                                }
+
                                 View videoItem = getLayoutInflater()
                                         .inflate(R.layout.item_movie_details_video, trailersContainer,
                                                 false);
@@ -219,7 +240,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
                                         if (video.getSite() != null
                                                 && video.getSite().toLowerCase().equals("youtube")) {
 
-                                            Uri webpage = TMDbUtils.buildYoutubeUri(video.getKey());
                                             Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
 
                                             if (intent.resolveActivity(getPackageManager()) != null) {
@@ -244,6 +264,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
                             hideTrailersView();
                         }
 
+                        if (shareText == null) {
+                            shareText = movie.getTitle()
+                                    + " (" + yearFormat.format(TMDbUtils
+                                    .parseDate(movie.getReleaseDate())) + ")";
+                        }
+
                     }
                 },
                 new Response.ErrorListener() {
@@ -266,9 +292,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         NetworkUtils.get(MovieDetailsActivity.this).addToRequestQueue(videosRequest);
     }
 
-    private void loadReviews(@NonNull Integer movieId) {
+    private void loadReviews(@NonNull Movie movie) {
 
-        String url = TMDbUtils.buildMovieReviewsUrl(movieId).toString();
+        String url = TMDbUtils.buildMovieReviewsUrl(movie.getId()).toString();
 
         // Start loading
         reviewsLoading.setVisibility(View.VISIBLE);
@@ -444,5 +470,70 @@ public class MovieDetailsActivity extends AppCompatActivity {
             favoriteButton.setBackgroundColor(Color.LTGRAY);
             favoriteButton.setTextColor(Color.BLACK);
         }
+    }
+
+    /**
+     * Starting a chooser to share the input text.
+     *
+     * @param text text to share
+     */
+    private void shareText(String text) {
+
+        // mimeType
+        String mimeType = "text/plain";
+
+        // title for the chooser window that will pop up
+        String title = getString(R.string.movie_detail_share_chooser_title);
+
+        // Use ShareCompat.IntentBuilder to build the Intent and start the chooser
+        Intent intent = ShareCompat.IntentBuilder.from(this)
+                .setChooserTitle(title)
+                .setType(mimeType)
+                .setText(text)
+                .getIntent();
+
+        // Call to update the share intent
+        // if (shareActionProvider != null) {
+        //     shareActionProvider.setShareIntent(intent);
+        // }
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        // Inflate menu resource file.
+        getMenuInflater().inflate(R.menu.activity_movie_details, menu);
+
+        // Locate MenuItem with ShareActionProvider
+        // MenuItem item = menu.findItem(R.id.menu_item_share);
+
+        // Fetch and store ShareActionProvider
+        // shareActionProvider = (ShareActionProvider) item.getActionProvider();
+
+        // Return true to display menu
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case R.id.menu_item_share:
+                if (shareText != null) {
+                    shareText(shareText);
+                }
+                break;
+
+            default:
+                break;
+
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
