@@ -5,6 +5,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.database.Cursor;
 
 import java.util.List;
 
@@ -34,12 +35,18 @@ public interface FavoritesDao {
     @Query("SELECT * FROM " + TABLE_NAME + " ORDER BY " + Columns.CREATION_DATE + " DESC")
     LiveData<List<Movie>> getAllAsync();
 
-    @Query("SELECT * FROM " + TABLE_NAME + " ORDER BY " + Columns.CREATION_DATE + " DESC "
+    @Query("SELECT * FROM " + TABLE_NAME + " ORDER BY " + Columns.CREATION_DATE + " DESC")
+    Cursor getAllCursor();
+
+    @Query("SELECT * FROM " + TABLE_NAME + " ORDER BY " + Columns.CREATION_DATE + " DESC"
             + " LIMIT :limit OFFSET :offset")
     List<Movie> getAll(int limit, int offset);
 
     @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + Columns.UID + " = :movieId")
-    Movie get(long movieId);
+    Movie getMovie(long movieId);
+
+    @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + Columns.UID + " = :movieId")
+    Cursor getMovieCursor(long movieId);
 
     @Insert(onConflict = REPLACE)
     void insert(Movie movie);

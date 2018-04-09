@@ -167,7 +167,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                favorite = favoritesDao.get(movie.getId());
+                favorite = favoritesDao.getMovie(movie.getId());
 
                 // Setup favorite view if exists
                 runOnUiThread(new Runnable() {
