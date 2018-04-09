@@ -7,13 +7,14 @@ import android.arch.persistence.room.PrimaryKey;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.example.android.popularmovies.data.FavoritesDao.Columns;
 import com.google.gson.annotations.SerializedName;
 
 import org.parceler.Parcel;
 
 import java.util.Date;
 import java.util.List;
+
+import com.example.android.popularmovies.data.MoviesContract.Columns;
 
 /**
  * Created by john on 03/03/18.
@@ -192,37 +193,37 @@ public class Movie  {
     }
     
     public Movie(Cursor cursor) {
-        setId(cursor.getInt(cursor.getColumnIndex(FavoritesDao.Columns.UID)));
-        setPosterPath(cursor.getString(cursor.getColumnIndex(FavoritesDao.Columns.POSTER_PATH)));
-        setTitle(cursor.getString(cursor.getColumnIndex(FavoritesDao.Columns.TITLE)));
-        setOverview(cursor.getString(cursor.getColumnIndex(FavoritesDao.Columns.OVERVIEW)));
-        setVoteAverage(cursor.getFloat(cursor.getColumnIndex(FavoritesDao.Columns.VOTE_AVERAGE)));
-        setReleaseDate(cursor.getString(cursor.getColumnIndex(FavoritesDao.Columns.RELEASE_DATE)));
+        setId(cursor.getInt(cursor.getColumnIndex(Columns.UID)));
+        setPosterPath(cursor.getString(cursor.getColumnIndex(Columns.POSTER_PATH)));
+        setTitle(cursor.getString(cursor.getColumnIndex(Columns.TITLE)));
+        setOverview(cursor.getString(cursor.getColumnIndex(Columns.OVERVIEW)));
+        setVoteAverage(cursor.getFloat(cursor.getColumnIndex(Columns.VOTE_AVERAGE)));
+        setReleaseDate(cursor.getString(cursor.getColumnIndex(Columns.RELEASE_DATE)));
         setCreationDate(FavoritesDatabase.Converters.fromTimestamp(cursor.getLong(cursor
-                        .getColumnIndex(FavoritesDao.Columns.CREATION_DATE))));
+                        .getColumnIndex(Columns.CREATION_DATE))));
     }
 
 
     public Movie(ContentValues values) {
-        setId(values.getAsInteger(FavoritesDao.Columns.UID));
-        setPosterPath(values.getAsString(FavoritesDao.Columns.POSTER_PATH));
-        setTitle(values.getAsString(FavoritesDao.Columns.TITLE));
-        setOverview(values.getAsString(FavoritesDao.Columns.OVERVIEW));
-        setVoteAverage(values.getAsFloat(FavoritesDao.Columns.VOTE_AVERAGE));
-        setReleaseDate(values.getAsString(FavoritesDao.Columns.RELEASE_DATE));
+        setId(values.getAsInteger(Columns.UID));
+        setPosterPath(values.getAsString(Columns.POSTER_PATH));
+        setTitle(values.getAsString(Columns.TITLE));
+        setOverview(values.getAsString(Columns.OVERVIEW));
+        setVoteAverage(values.getAsFloat(Columns.VOTE_AVERAGE));
+        setReleaseDate(values.getAsString(Columns.RELEASE_DATE));
         setCreationDate(FavoritesDatabase.Converters
-                .fromTimestamp(values.getAsLong(FavoritesDao.Columns.CREATION_DATE)));
+                .fromTimestamp(values.getAsLong(Columns.CREATION_DATE)));
     }
 
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(FavoritesDao.Columns.UID, getId());
-        cv.put(FavoritesDao.Columns.TITLE, getTitle());
-        cv.put(FavoritesDao.Columns.POSTER_PATH, getPosterPath());
-        cv.put(FavoritesDao.Columns.OVERVIEW, getOverview());
-        cv.put(FavoritesDao.Columns.RELEASE_DATE, getReleaseDate());
-        cv.put(FavoritesDao.Columns.VOTE_AVERAGE, getVoteAverage());
-        cv.put(FavoritesDao.Columns.CREATION_DATE, FavoritesDatabase.Converters
+        cv.put(Columns.UID, getId());
+        cv.put(Columns.TITLE, getTitle());
+        cv.put(Columns.POSTER_PATH, getPosterPath());
+        cv.put(Columns.OVERVIEW, getOverview());
+        cv.put(Columns.RELEASE_DATE, getReleaseDate());
+        cv.put(Columns.VOTE_AVERAGE, getVoteAverage());
+        cv.put(Columns.CREATION_DATE, FavoritesDatabase.Converters
                 .toTimestamp(getCreationDate()));
         return cv;
     }

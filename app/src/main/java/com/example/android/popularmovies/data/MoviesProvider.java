@@ -1,6 +1,5 @@
 package com.example.android.popularmovies.data;
 
-import android.arch.persistence.room.Room;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -13,26 +12,27 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import static com.example.android.popularmovies.data.MoviesContract.*;
+
 /**
  * Created by john on 09/04/18.
  */
 
 public class MoviesProvider extends ContentProvider {
 
-    static final String PROVIDER_NAME = "com.example.android.popularmovies.data.MoviesProvider";
-    static final String PATH = "movies";
-    static final String URL = "content://" + PROVIDER_NAME + "/" + PATH;
-    static final Uri CONTENT_URI = Uri.parse(URL);
+//    static final String AUTHORITY = "com.example.android.popularmovies.data.MoviesProvider";
+//    static final String PATH = "movies";
+//    static final String URL = "content://" + AUTHORITY + "/" + PATH;
+//    static final Uri CONTENT_URI = Uri.parse(URL);
 
     static final int MOVIES_URI_CODE = 1;
     static final int MOVIE_ID_URI_CODE = 2;
 
     static final UriMatcher uriMatcher;
-
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(PROVIDER_NAME, PATH, MOVIES_URI_CODE);
-        uriMatcher.addURI(PROVIDER_NAME, PATH + "/#", MOVIE_ID_URI_CODE);
+        uriMatcher.addURI(AUTHORITY, PATH, MOVIES_URI_CODE);
+        uriMatcher.addURI(AUTHORITY, PATH + "/#", MOVIE_ID_URI_CODE);
     }
 
     private FavoritesDao dao;
@@ -130,7 +130,8 @@ public class MoviesProvider extends ContentProvider {
      */
     @Nullable
     @Override
-    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection,
+                        @Nullable String[] selectionArgs, @Nullable String sortOrder) {
 
         Cursor cursor = null;
 
@@ -180,12 +181,12 @@ public class MoviesProvider extends ContentProvider {
              * Get all student records
              */
             case MOVIES_URI_CODE:
-                return "vnd.android.cursor.item/vnd." + PROVIDER_NAME + "." + PATH;
+                return "vnd.android.cursor.item/vnd." + AUTHORITY + "." + PATH;
             /**
              * Get a particular student
              */
             case MOVIE_ID_URI_CODE:
-                return "vnd.android.cursor.item/vnd." + PROVIDER_NAME + "." + PATH;
+                return "vnd.android.cursor.item/vnd." + AUTHORITY + "." + PATH;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
@@ -280,7 +281,8 @@ public class MoviesProvider extends ContentProvider {
      * @return the number of rows affected.
      */
     @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
+    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection,
+                      @Nullable String[] selectionArgs) {
         throw new IllegalArgumentException("Method not supported");
     }
 }
