@@ -33,9 +33,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     private static final String TAG = DiscoveryAdapter.class.getSimpleName();
     private final Context context;
 
-    // RecyclerView's LayoutManager
-    private final LinearLayoutManager layoutManager;
-
     // Discovered movies list
     private List<Movie> movies = new ArrayList<Movie>();
 
@@ -53,12 +50,10 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     /**
      * Initializes the adapter with a {@link Context} and discovery movies data
      *
-     * @param context       typically the container activity
-     * @param layoutManager {@link RecyclerView}'s LayoutManager
+     * @param context typically the container activity
      */
-    public DiscoveryAdapter(Context context, LinearLayoutManager layoutManager) {
+    public DiscoveryAdapter(Context context) {
         this.context = context;
-        this.layoutManager = layoutManager;
     }
 
     /**
@@ -112,7 +107,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     @Override
     public void onBindViewHolder(DiscoveryAdapter.ViewHolder holder, int position) {
 
-        final Movie movie = movies.get(position);
+        final Movie movie = getItem(position);
 
         String posterPath = movie.getPosterPath();
 
@@ -241,8 +236,8 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         }
     }
 
-    public void remove(Movie city) {
-        int position = movies.indexOf(city);
+    public void remove(Movie movie) {
+        int position = movies.indexOf(movie);
         if (position > -1) {
             movies.remove(position);
             notifyItemRemoved(position);
@@ -274,15 +269,22 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
     }
 
     public void stopLoading() {
-        int position = movies.size() - 1;
+        int position = getItemCount() - 1;
         Movie item = getItem(position);
 
         if (item != null) {
-            movies.remove(position);
+            //movies.remove(position);
+            remove(item);
             notifyItemRemoved(position);
         }
     }
 
+    /**
+     * Returns the item at that position.
+     *
+     * @param position of returned item
+     * @return the item at that position
+     */
     public Movie getItem(int position) {
         return movies.get(position);
     }

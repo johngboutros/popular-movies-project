@@ -28,7 +28,8 @@ public class MoviesProvider extends ContentProvider {
     static final int MOVIE_ID_URI_CODE = 2;
 
     static final UriMatcher uriMatcher;
-    static{
+
+    static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(PROVIDER_NAME, PATH, MOVIES_URI_CODE);
         uriMatcher.addURI(PROVIDER_NAME, PATH + "/#", MOVIE_ID_URI_CODE);
@@ -174,17 +175,17 @@ public class MoviesProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-        switch (uriMatcher.match(uri)){
+        switch (uriMatcher.match(uri)) {
             /**
              * Get all student records
              */
             case MOVIES_URI_CODE:
-                return "vnd.android.cursor.dir/vnd.example.movies";
+                return "vnd.android.cursor.item/vnd." + PROVIDER_NAME + "." + PATH;
             /**
              * Get a particular student
              */
             case MOVIE_ID_URI_CODE:
-                return "vnd.android.cursor.item/vnd.example.movies";
+                return "vnd.android.cursor.item/vnd." + PROVIDER_NAME + "." + PATH;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
@@ -207,16 +208,7 @@ public class MoviesProvider extends ContentProvider {
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
 
-        Movie movie = new Movie();
-
-        movie.setId(values.getAsInteger(FavoritesDao.Columns.UID));
-        movie.setPosterPath(values.getAsString(FavoritesDao.Columns.POSTER_PATH));
-        movie.setTitle(values.getAsString(FavoritesDao.Columns.TITLE));
-        movie.setOverview(values.getAsString(FavoritesDao.Columns.OVERVIEW));
-        movie.setVoteAverage(values.getAsFloat(FavoritesDao.Columns.VOTE_AVERAGE));
-        movie.setReleaseDate(values.getAsString(FavoritesDao.Columns.RELEASE_DATE));
-        movie.setCreationDate(FavoritesDatabase.Converters
-                .fromTimestamp(values.getAsLong(FavoritesDao.Columns.CREATION_DATE)));
+        Movie movie = new Movie(values);
 
         dao.insert(movie);
 
@@ -249,11 +241,12 @@ public class MoviesProvider extends ContentProvider {
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
         int count = 0;
-        switch (uriMatcher.match(uri)){
+        switch (uriMatcher.match(uri)) {
             case MOVIE_ID_URI_CODE:
                 String idSegment = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
                 Long id = Long.parseLong(idSegment);
 
+                // TODO Try deleting with movie id only
                 Movie exists = dao.getMovie(id);
                 if (exists != null) {
                     dao.delete(exists);

@@ -4,7 +4,6 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
@@ -126,7 +125,7 @@ public class DiscoveryActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(this, gridColumns);
         discoveryRecyclerView.setLayoutManager(layoutManager);
 
-        discoveryAdapter = new DiscoveryAdapter(this, layoutManager);
+        discoveryAdapter = new DiscoveryAdapter(this);
         discoveryRecyclerView.setAdapter(discoveryAdapter);
 
         if (savedInstanceState == null) {
@@ -414,6 +413,38 @@ public class DiscoveryActivity extends AppCompatActivity {
             discoveryAdapter.startLoading();
         }
 
+        // Using Cursor by Room
+//        AsyncTask.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                final Cursor cursor = favoritesDao.getAllCursor();
+//
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        if (!currentSortOption.equals(SortOption.FAVORITS))
+//                            return;
+//
+//                        if (isLoading) {
+//                            isLoading = false;
+//                            discoveryAdapter.stopLoading();
+//                        }
+//
+//                        Log.d(TAG, "Favorites loaded, size: " + cursor.getCount());
+//
+//                        while (cursor.moveToNext()) {
+//
+//                            Movie movie = new Movie(cursor);
+//
+//                            discoveryAdapter.add(movie);
+//                        }
+//                    }
+//                });
+//            }
+//        });
+
+        // Using Room's LiveData
         LiveData<List<Movie>> favorites = favoritesDao.getAllAsync();
 
         favorites.observe(this, new Observer<List<Movie>>() {

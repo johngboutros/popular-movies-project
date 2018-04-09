@@ -32,7 +32,7 @@ public abstract class FavoritesDatabase extends RoomDatabase {
 
     public abstract FavoritesDao favoritesDao();
 
-    static class Converters {
+    public static class Converters {
         @TypeConverter
         public static Date fromTimestamp(Long value) {
             return value == null ? null : new Date(value);

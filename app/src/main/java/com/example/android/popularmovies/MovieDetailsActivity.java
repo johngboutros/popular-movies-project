@@ -412,6 +412,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         // Disable button
         favoriteButton.setEnabled(false);
 
+        // TODO Using ContentResolver
+
+        // Using Room DAO
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -438,6 +441,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         // Disable button
         favoriteButton.setEnabled(false);
 
+        // TODO Using ContentResolver
+
+        // Using Room DAO
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
