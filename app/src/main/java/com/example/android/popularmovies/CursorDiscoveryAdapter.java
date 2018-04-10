@@ -9,7 +9,7 @@ import com.example.android.popularmovies.data.Movie;
  * Created by john on 09/04/18.
  */
 
-public class CursorDiscoveryAdapter extends DiscoveryAdapter {
+public class CursorDiscoveryAdapter extends AbstractDiscoveryAdapter {
 
     // Class variable for the Cursor that holds task data
     private Cursor mCursor;
@@ -64,20 +64,4 @@ public class CursorDiscoveryAdapter extends DiscoveryAdapter {
         return temp;
     }
 
-    /**
-     * Adds a movie to the adapter and notifies any registered observers that the item reflected at
-     * position has been newly inserted. The item previously at position is now at position
-     * position + 1.
-     *
-     * @param movie
-     */
-    @Override
-    public void add(Movie movie) {
-        // TODO
-    }
-
-    @Override
-    public void remove(Movie movie) {
-        // TODO
-    }
 }

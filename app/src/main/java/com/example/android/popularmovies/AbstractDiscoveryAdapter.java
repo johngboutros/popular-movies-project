@@ -3,7 +3,6 @@ package com.example.android.popularmovies;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -25,19 +24,19 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by john on 03/03/18.
+ * Created by john on 10/04/18.
  */
 
-public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.ViewHolder> {
+public abstract class AbstractDiscoveryAdapter extends RecyclerView.Adapter<AbstractDiscoveryAdapter.ViewHolder> {
 
-    private static final String TAG = DiscoveryAdapter.class.getSimpleName();
     private final Context context;
 
-    // Discovered movies list
-    private List<Movie> movies = new ArrayList<Movie>();
-
     // Registered Movie Click Listeners
-    private List<MovieClickListener> movieClickListeners = new ArrayList<MovieClickListener>();
+    private List<AbstractDiscoveryAdapter.MovieClickListener> movieClickListeners = new ArrayList<AbstractDiscoveryAdapter.MovieClickListener>();
+
+    protected AbstractDiscoveryAdapter(Context context) {
+        this.context = context;
+    }
 
     /**
      * ItemType could be used to view some items in a different way such as taking a whole row span
@@ -47,17 +46,9 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         MOVIE, LOADING_MOVIE
     }
 
-    /**
-     * Initializes the adapter with a {@link Context} and discovery movies data
-     *
-     * @param context typically the container activity
-     */
-    public DiscoveryAdapter(Context context) {
-        this.context = context;
-    }
 
     /**
-     * Called when RecyclerView needs a new {@link ViewHolder} of the given type to represent
+     * Called when RecyclerView needs a new {@link AbstractDiscoveryAdapter.ViewHolder} of the given type to represent
      * an item.
      * <p>
      * This new ViewHolder should be constructed with a new View that can represent the items
@@ -65,7 +56,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
      * layout file.
      * <p>
      * The new ViewHolder will be used to display items of the adapter using
-     * {@link #onBindViewHolder(ViewHolder, int, List)}. Since it will be re-used to display
+     * {@link #onBindViewHolder(AbstractDiscoveryAdapter.ViewHolder, int, List)}. Since it will be re-used to display
      * different items in the data set, it is a good idea to cache references to sub views of
      * the View to avoid unnecessary {@link View#findViewById(int)} calls.
      *
@@ -74,19 +65,19 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
      * @param viewType The view type of the new View.
      * @return A new ViewHolder that holds a View of the given view type.
      * @see #getItemViewType(int)
-     * @see #onBindViewHolder(ViewHolder, int)
+     * @see #onBindViewHolder(AbstractDiscoveryAdapter.ViewHolder, int)
      */
     @Override
-    public DiscoveryAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public AbstractDiscoveryAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_discovery, parent, false);
 
-        return new ViewHolder(view);
+        return new AbstractDiscoveryAdapter.ViewHolder(view);
     }
 
     /**
      * Called by RecyclerView to display the data at the specified position. This method should
-     * update the contents of the {@link ViewHolder#itemView} to reflect the item at the given
+     * update the contents of the {@link AbstractDiscoveryAdapter.ViewHolder#itemView} to reflect the item at the given
      * position.
      * <p>
      * Note that unlike {@link ListView}, RecyclerView will not call this method
@@ -94,10 +85,10 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
      * invalidated or the new position cannot be determined. For this reason, you should only
      * use the <code>position</code> parameter while acquiring the related data item inside
      * this method and should not keep a copy of it. If you need the position of an item later
-     * on (e.g. in a click listener), use {@link ViewHolder#getAdapterPosition()} which will
+     * on (e.g. in a click listener), use {@link AbstractDiscoveryAdapter.ViewHolder#getAdapterPosition()} which will
      * have the updated adapter position.
      * <p>
-     * Override {@link #onBindViewHolder(ViewHolder, int, List)} instead if Adapter can
+     * Override {@link #onBindViewHolder(AbstractDiscoveryAdapter.ViewHolder, int, List)} instead if Adapter can
      * handle efficient partial bind.
      *
      * @param holder   The ViewHolder which should be updated to represent the contents of the
@@ -105,7 +96,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
      * @param position The position of the item within the adapter's data set.
      */
     @Override
-    public void onBindViewHolder(DiscoveryAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(AbstractDiscoveryAdapter.ViewHolder holder, int position) {
 
         final Movie movie = getItem(position);
 
@@ -167,7 +158,7 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
                 holder.image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        for (MovieClickListener listener : movieClickListeners) {
+                        for (AbstractDiscoveryAdapter.MovieClickListener listener : movieClickListeners) {
                             listener.onMovieClicked(movie);
                         }
                     }
@@ -183,15 +174,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         }
     }
 
-    /**
-     * Returns the total number of items in the data set held by the adapter.
-     *
-     * @return The total number of items in this adapter.
-     */
-    @Override
-    public int getItemCount() {
-        return movies.size();
-    }
 
     /**
      * ViewHolder to display a discovery movie item
@@ -213,81 +195,6 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         }
     }
 
-    /**
-     * Adds a movie to the adapter and notifies any registered observers that the item reflected at
-     * position has been newly inserted. The item previously at position is now at position
-     * position + 1.
-     *
-     * @param movie
-     */
-    public void add(Movie movie) {
-        movies.add(movie);
-        notifyItemInserted(movies.size() - 1);
-    }
-
-    /**
-     * Adds movies to the adapter.
-     *
-     * @param movies
-     */
-    public void addAll(List<Movie> movies) {
-        for (Movie movie : movies) {
-            add(movie);
-        }
-    }
-
-    public void remove(Movie movie) {
-        int position = movies.indexOf(movie);
-        if (position > -1) {
-            movies.remove(position);
-            notifyItemRemoved(position);
-        }
-    }
-
-    public void clear() {
-        while (getItemCount() > 0) {
-            remove(getItem(0));
-        }
-    }
-
-    public boolean isEmpty() {
-        return getItemCount() == 0;
-    }
-
-    /**
-     * Returns the currently displayed movies List.
-     *
-     * @return the currently displayed movies List.
-     */
-    public List<Movie> getMovies() {
-        return movies;
-    }
-
-    public void startLoading() {
-        // An empty movie should be viewed as a loading view
-        add(new Movie());
-    }
-
-    public void stopLoading() {
-        int position = getItemCount() - 1;
-        Movie item = getItem(position);
-
-        if (item != null) {
-            //movies.remove(position);
-            remove(item);
-            notifyItemRemoved(position);
-        }
-    }
-
-    /**
-     * Returns the item at that position.
-     *
-     * @param position of returned item
-     * @return the item at that position
-     */
-    public Movie getItem(int position) {
-        return movies.get(position);
-    }
 
     /**
      * Called by RecyclerView when it starts observing this Adapter.
@@ -401,8 +308,5 @@ public class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryAdapter.View
         movieClickListeners.remove(listener);
     }
 
-    public void setMovies(List<Movie> movies) {
-        this.movies = movies;
-        notifyDataSetChanged();
-    }
+    protected abstract Movie getItem(int position);
 }

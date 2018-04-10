@@ -20,7 +20,7 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.example.android.popularmovies.DiscoveryAdapter.MovieClickListener;
+import com.example.android.popularmovies.AbstractDiscoveryAdapter.MovieClickListener;
 import com.example.android.popularmovies.components.PaginationScrollListener;
 import com.example.android.popularmovies.data.FavoritesDao;
 import com.example.android.popularmovies.data.FavoritesDatabase;
@@ -99,8 +99,8 @@ public class DiscoveryActivity extends AppCompatActivity {
     private final static String ADAPTER_STATE_BUNDLE_KEY = "adapter_state";
     private final static String TITLE_BUNDLE_KEY = "title";
 
-    // Discovery Adapter
-    private DiscoveryAdapter discoveryAdapter;
+    // TMDb API Discovery Adapter
+    private ListDiscoveryAdapter discoveryAdapter;
 
     // MovieClickListener
     private MovieClickListener movieClickListener;
@@ -125,7 +125,7 @@ public class DiscoveryActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(this, gridColumns);
         discoveryRecyclerView.setLayoutManager(layoutManager);
 
-        discoveryAdapter = new DiscoveryAdapter(this);
+        discoveryAdapter = new ListDiscoveryAdapter(this);
         discoveryRecyclerView.setAdapter(discoveryAdapter);
 
         if (savedInstanceState == null) {
