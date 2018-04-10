@@ -45,6 +45,16 @@ public class CursorDiscoveryAdapter extends AbstractDiscoveryAdapter {
         return mCursor.getCount();
     }
 
+    @Override
+    public void startLoading() {
+        // TODO
+    }
+
+    @Override
+    public void stopLoading() {
+        // TODO
+    }
+
     /**
      * When data changes and a re-query occurs, this function swaps the old Cursor
      * with a newly updated Cursor (Cursor c) that is passed in.
@@ -64,4 +74,7 @@ public class CursorDiscoveryAdapter extends AbstractDiscoveryAdapter {
         return temp;
     }
 
+    public Cursor getCursor() {
+        return mCursor;
+    }
 }

@@ -32,7 +32,7 @@ public abstract class AbstractDiscoveryAdapter extends RecyclerView.Adapter<Abst
     private final Context context;
 
     // Registered Movie Click Listeners
-    private List<AbstractDiscoveryAdapter.MovieClickListener> movieClickListeners = new ArrayList<AbstractDiscoveryAdapter.MovieClickListener>();
+    private List<MovieClickListener> movieClickListeners = new ArrayList<MovieClickListener>();
 
     protected AbstractDiscoveryAdapter(Context context) {
         this.context = context;
@@ -309,4 +309,8 @@ public abstract class AbstractDiscoveryAdapter extends RecyclerView.Adapter<Abst
     }
 
     protected abstract Movie getItem(int position);
+
+    public abstract void startLoading();
+
+    public abstract void stopLoading();
 }

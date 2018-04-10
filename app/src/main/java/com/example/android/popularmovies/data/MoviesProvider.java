@@ -20,11 +20,6 @@ import static com.example.android.popularmovies.data.MoviesContract.*;
 
 public class MoviesProvider extends ContentProvider {
 
-//    static final String AUTHORITY = "com.example.android.popularmovies.data.MoviesProvider";
-//    static final String PATH = "movies";
-//    static final String URL = "content://" + AUTHORITY + "/" + PATH;
-//    static final Uri CONTENT_URI = Uri.parse(URL);
-
     static final int MOVIES_URI_CODE = 1;
     static final int MOVIE_ID_URI_CODE = 2;
 
