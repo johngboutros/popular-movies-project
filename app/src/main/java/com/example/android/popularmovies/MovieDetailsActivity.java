@@ -417,11 +417,15 @@ public class MovieDetailsActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                // Using ContentResolver
+                /*
+                   Using ContentResolver
+                  */
                 getContentResolver().insert(MoviesContract.CONTENT_URI, movie.toContentValues());
 
-                // Using Room DAO
-                // favoritesDao.insert(movie);
+                /*
+                   Using Room DAO
+                  */
+//                 favoritesDao.insert(movie);
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -448,13 +452,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                // Using ContentResolver
+                /*
+                   Using ContentResolver
+                  */
                 getContentResolver().delete(MoviesContract.CONTENT_URI.buildUpon()
                                 .appendPath("" + movie.getId()).build(), null,
                         null);
 
-                // Using Room DAO
-                // favoritesDao.delete(movie);
+                /*
+                   Using Room DAO
+                  */
+//                 favoritesDao.delete(movie);
 
                 runOnUiThread(new Runnable() {
                     @Override

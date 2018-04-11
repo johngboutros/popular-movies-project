@@ -154,9 +154,11 @@ public class DiscoveryActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Listeners should also be registered once an Adapter is re-initialized
-        registerMovieClickListener(discoveryAdapter);
-        if (discoveryAdapter instanceof ListDiscoveryAdapter)
-            registerScrollListener();
+        if (discoveryAdapter != null) {
+            registerMovieClickListener(discoveryAdapter);
+            if (discoveryAdapter instanceof ListDiscoveryAdapter)
+                registerScrollListener();
+        }
     }
 
     @Override
@@ -458,75 +460,63 @@ public class DiscoveryActivity extends AppCompatActivity {
     }
 
     private void loadFavorites() {
-        // Using ContentObserver
-        favoritesObserver.observe();
 
+        /*
+          Using ContentObserver
+         */
+//        favoritesObserver.observe();
+
+        // Start loading
 //        if (!isLoading) {
 //            isLoading = true;
 //            discoveryAdapter.startLoading();
 //        }
 
-        // Using Cursor by ContentResolver
-//        AsyncTask.execute(new Runnable() {
-//            @Override
-//            public void run() {
-//
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                /*
+                  Using Cursor by ContentResolver
+                 */
 //                final Cursor cursor = getContentResolver().query(MoviesContract.CONTENT_URI,
 //                        null, null, null, null);
-//
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        if (!currentSortOption.equals(SortOption.FAVORITES))
-//                            return;
-//
-//                        if (isLoading) {
-//                            isLoading = false;
-//                            discoveryAdapter.stopLoading();
-//                        }
-//
-//                        ((CursorDiscoveryAdapter) discoveryAdapter).swapCursor(cursor);
-//
-//                        Log.d(TAG, "Favorites loaded, size: " + cursor.getCount());
-//                    }
-//                });
-//            }
-//        });
 
+                /*
+                   Using Cursor by Room
+                  */
+                final Cursor cursor = favoritesDao.getAllCursor();
 
-        // Using Cursor by Room
-//        AsyncTask.execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                final Cursor cursor = favoritesDao.getAllCursor();
-//
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        if (!currentSortOption.equals(SortOption.FAVORITES))
-//                            return;
-//
-//                        if (isLoading) {
-//                            isLoading = false;
-//                            discoveryAdapter.stopLoading();
-//                        }
-//
-//                        Log.d(TAG, "Favorites loaded, size: " + cursor.getCount());
-//
-//                        while (cursor.moveToNext()) {
-//
-//                            Movie movie = new Movie(cursor);
-//
-//                            discoveryAdapter.add(movie);
-//                        }
-//                    }
-//                });
-//            }
-//        });
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-        // Using Room's LiveData
+                        if (!currentSortOption.equals(SortOption.FAVORITES))
+                            return;
+
+                        // Stop loading
+                        if (isLoading) {
+                            isLoading = false;
+                            discoveryAdapter.stopLoading();
+                        }
+
+                        ((CursorDiscoveryAdapter) discoveryAdapter).swapCursor(cursor);
+
+                        Log.d(TAG, "Favorites loaded, size: " + cursor.getCount());
+                    }
+                });
+            }
+        });
+
+        /*
+          Using Room's LiveData (requires ListDiscoveryAdapter)
+
+          (Recommended as besides leveraging Room's sync implementation
+           and saving data access boilerplate code, it allows using the same
+           Adapter as discovery which based on a List; eliminating the code
+           to maintain both types of adapters e.g. listeners registration
+           and instance restoring)
+         */
 //        LiveData<List<Movie>> favorites = favoritesDao.getAllAsync();
 //
 //        favorites.observe(this, new Observer<List<Movie>>() {
@@ -536,6 +526,7 @@ public class DiscoveryActivity extends AppCompatActivity {
 //                if (!currentSortOption.equals(SortOption.FAVORITES))
 //                    return;
 //
+//                // Stop loading
 //                if (isLoading) {
 //                    isLoading = false;
 //                    discoveryAdapter.stopLoading();
@@ -547,6 +538,7 @@ public class DiscoveryActivity extends AppCompatActivity {
 //
 //            }
 //        });
+
     }
 
     private void setupDiscoveryAdapter() {
