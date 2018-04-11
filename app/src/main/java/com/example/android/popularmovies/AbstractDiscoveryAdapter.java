@@ -313,4 +313,6 @@ public abstract class AbstractDiscoveryAdapter extends RecyclerView.Adapter<Abst
     public abstract void startLoading();
 
     public abstract void stopLoading();
+
+    public abstract void clear();
 }

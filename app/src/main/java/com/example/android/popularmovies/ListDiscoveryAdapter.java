@@ -97,9 +97,7 @@ public class ListDiscoveryAdapter extends AbstractDiscoveryAdapter {
         Movie item = getItem(position);
 
         if (item != null) {
-            //movies.remove(position);
             remove(item);
-            notifyItemRemoved(position);
         }
     }
 

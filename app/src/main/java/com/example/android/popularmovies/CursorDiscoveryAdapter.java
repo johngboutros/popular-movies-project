@@ -47,12 +47,17 @@ public class CursorDiscoveryAdapter extends AbstractDiscoveryAdapter {
 
     @Override
     public void startLoading() {
-        // TODO
+        // TODO implement startLoading()
     }
 
     @Override
     public void stopLoading() {
-        // TODO
+        // TODO implement stopLoading()
+    }
+
+    @Override
+    public void clear() {
+        // TODO implement clear()
     }
 
     /**

@@ -25,6 +25,7 @@ import com.android.volley.VolleyError;
 import com.example.android.popularmovies.data.FavoritesDao;
 import com.example.android.popularmovies.data.FavoritesDatabase;
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.data.MoviesContract;
 import com.example.android.popularmovies.data.Review;
 import com.example.android.popularmovies.data.Video;
 import com.example.android.popularmovies.utilities.GsonRequest;
@@ -412,13 +413,15 @@ public class MovieDetailsActivity extends AppCompatActivity {
         // Disable button
         favoriteButton.setEnabled(false);
 
-        // TODO Using ContentResolver
-
-        // Using Room DAO
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                favoritesDao.insert(movie);
+
+                // Using ContentResolver
+                getContentResolver().insert(MoviesContract.CONTENT_URI, movie.toContentValues());
+
+                // Using Room DAO
+                // favoritesDao.insert(movie);
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -441,13 +444,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
         // Disable button
         favoriteButton.setEnabled(false);
 
-        // TODO Using ContentResolver
-
-        // Using Room DAO
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                favoritesDao.delete(movie);
+
+                // Using ContentResolver
+                getContentResolver().delete(MoviesContract.CONTENT_URI.buildUpon()
+                                .appendPath("" + movie.getId()).build(), null,
+                        null);
+
+                // Using Room DAO
+                // favoritesDao.delete(movie);
 
                 runOnUiThread(new Runnable() {
                     @Override

@@ -1,13 +1,15 @@
 package com.example.android.popularmovies;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,6 +27,7 @@ import com.example.android.popularmovies.components.PaginationScrollListener;
 import com.example.android.popularmovies.data.FavoritesDao;
 import com.example.android.popularmovies.data.FavoritesDatabase;
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.data.MoviesContract;
 import com.example.android.popularmovies.utilities.GsonRequest;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.utilities.TMDbUtils;
@@ -48,7 +51,7 @@ public class DiscoveryActivity extends AppCompatActivity {
      * Available sort options provided by the adapter
      */
     public enum SortOption {
-        POPULARITY, TOP_RATED, RELEASE_DATE, REVENUE, FAVORITS
+        POPULARITY, TOP_RATED, RELEASE_DATE, REVENUE, FAVORITES
     }
 
     @BindView(R.id.discovery_list_rv)
@@ -99,14 +102,23 @@ public class DiscoveryActivity extends AppCompatActivity {
     private final static String ADAPTER_STATE_BUNDLE_KEY = "adapter_state";
     private final static String TITLE_BUNDLE_KEY = "title";
 
+    // TMDb API / Favorites Discovery Adapter
+    private AbstractDiscoveryAdapter discoveryAdapter;
+
     // TMDb API Discovery Adapter
-    private ListDiscoveryAdapter discoveryAdapter;
+    // private ListDiscoveryAdapter discoveryAdapter;
+
+    // Favorites Adapter
+    // private CursorDiscoveryAdapter favoritesAdapter;
 
     // MovieClickListener
     private MovieClickListener movieClickListener;
 
     // Scroll listener
     private ScrollListener scrollListener;
+
+    // Favorites Observer
+    private FavoritesObserver favoritesObserver;
 
     // Favorites DAO
     private FavoritesDao favoritesDao;
@@ -125,9 +137,6 @@ public class DiscoveryActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(this, gridColumns);
         discoveryRecyclerView.setLayoutManager(layoutManager);
 
-        discoveryAdapter = new ListDiscoveryAdapter(this);
-        discoveryRecyclerView.setAdapter(discoveryAdapter);
-
         if (savedInstanceState == null) {
             loadSortPreferences();
         } else {
@@ -144,7 +153,26 @@ public class DiscoveryActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        // Listeners should also be registered once an Adapter is re-initialized
+        registerMovieClickListener(discoveryAdapter);
+        if (discoveryAdapter instanceof ListDiscoveryAdapter)
+            registerScrollListener();
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterMovieClickListener(discoveryAdapter);
+        unregisterScrollListener();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterFavoritesObserver();
+    }
+
+    private void registerMovieClickListener(AbstractDiscoveryAdapter discoveryAdapter) {
         if (movieClickListener == null) {
             movieClickListener = new MovieClickListener() {
                 @Override
@@ -159,7 +187,16 @@ public class DiscoveryActivity extends AppCompatActivity {
             };
             discoveryAdapter.addMovieClickListener(movieClickListener);
         }
+    }
 
+    private void unregisterMovieClickListener(AbstractDiscoveryAdapter discoveryAdapter) {
+        if (movieClickListener != null) {
+            discoveryAdapter.removeMovieClickListener(movieClickListener);
+            movieClickListener = null;
+        }
+    }
+
+    private void registerScrollListener() {
         if (scrollListener == null) {
             scrollListener = new ScrollListener(
                     (LinearLayoutManager) discoveryRecyclerView.getLayoutManager());
@@ -167,18 +204,25 @@ public class DiscoveryActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        if (movieClickListener != null) {
-            discoveryAdapter.removeMovieClickListener(movieClickListener);
-            movieClickListener = null;
-        }
-
+    private void unregisterScrollListener() {
         if (scrollListener != null) {
             discoveryRecyclerView.removeOnScrollListener(scrollListener);
             scrollListener = null;
+        }
+    }
+
+    private void registerFavoritesObserver() {
+        if (favoritesObserver == null) {
+            favoritesObserver = new FavoritesObserver(new Handler());
+            getContentResolver().registerContentObserver(MoviesContract.CONTENT_URI,
+                    true, favoritesObserver);
+        }
+    }
+
+    private void unregisterFavoritesObserver() {
+        if (favoritesObserver != null) {
+            getContentResolver().unregisterContentObserver(favoritesObserver);
+            favoritesObserver = null;
         }
     }
 
@@ -289,7 +333,7 @@ public class DiscoveryActivity extends AppCompatActivity {
             discoverMore(SortOption.REVENUE);
         } else if (sortPrefFavorites.equals(preferenceValue)) {
             setTitle(R.string.menu_favorites);
-            discoverMore(SortOption.FAVORITS);
+            discoverMore(SortOption.FAVORITES);
         }
 
     }
@@ -320,6 +364,12 @@ public class DiscoveryActivity extends AppCompatActivity {
      */
     public void discoverMore(SortOption sortOption) {
 
+        if (SortOption.FAVORITES.equals(sortOption)) {
+            setupFavoritesAdapter();
+        } else {
+            setupDiscoveryAdapter();
+        }
+
         if (sortOption != null && !currentSortOption.equals(sortOption)) {
             this.currentSortOption = sortOption;
             if (isLoading) {
@@ -336,7 +386,7 @@ public class DiscoveryActivity extends AppCompatActivity {
         String url = null;
 
         switch (this.currentSortOption) {
-            case FAVORITS:
+            case FAVORITES:
                 loadFavorites();
                 break;
             case POPULARITY:
@@ -362,6 +412,7 @@ public class DiscoveryActivity extends AppCompatActivity {
     }
 
     private void loadUrl(String url) {
+
         if (!isLoading) {
             isLoading = true;
             discoveryAdapter.startLoading();
@@ -384,7 +435,7 @@ public class DiscoveryActivity extends AppCompatActivity {
 
                         pageCount = moviePage.getPage();
                         totalPageCount = moviePage.getTotalPages();
-                        discoveryAdapter.addAll(moviePage.getResults());
+                        ((ListDiscoveryAdapter) discoveryAdapter).addAll(moviePage.getResults());
 
                     }
                 },
@@ -407,11 +458,42 @@ public class DiscoveryActivity extends AppCompatActivity {
     }
 
     private void loadFavorites() {
+        // Using ContentObserver
+        favoritesObserver.observe();
 
-        if (!isLoading) {
-            isLoading = true;
-            discoveryAdapter.startLoading();
-        }
+//        if (!isLoading) {
+//            isLoading = true;
+//            discoveryAdapter.startLoading();
+//        }
+
+        // Using Cursor by ContentResolver
+//        AsyncTask.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                final Cursor cursor = getContentResolver().query(MoviesContract.CONTENT_URI,
+//                        null, null, null, null);
+//
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        if (!currentSortOption.equals(SortOption.FAVORITES))
+//                            return;
+//
+//                        if (isLoading) {
+//                            isLoading = false;
+//                            discoveryAdapter.stopLoading();
+//                        }
+//
+//                        ((CursorDiscoveryAdapter) discoveryAdapter).swapCursor(cursor);
+//
+//                        Log.d(TAG, "Favorites loaded, size: " + cursor.getCount());
+//                    }
+//                });
+//            }
+//        });
+
 
         // Using Cursor by Room
 //        AsyncTask.execute(new Runnable() {
@@ -423,7 +505,7 @@ public class DiscoveryActivity extends AppCompatActivity {
 //                    @Override
 //                    public void run() {
 //
-//                        if (!currentSortOption.equals(SortOption.FAVORITS))
+//                        if (!currentSortOption.equals(SortOption.FAVORITES))
 //                            return;
 //
 //                        if (isLoading) {
@@ -445,26 +527,54 @@ public class DiscoveryActivity extends AppCompatActivity {
 //        });
 
         // Using Room's LiveData
-        LiveData<List<Movie>> favorites = favoritesDao.getAllAsync();
+//        LiveData<List<Movie>> favorites = favoritesDao.getAllAsync();
+//
+//        favorites.observe(this, new Observer<List<Movie>>() {
+//            @Override
+//            public void onChanged(@Nullable List<Movie> movies) {
+//
+//                if (!currentSortOption.equals(SortOption.FAVORITES))
+//                    return;
+//
+//                if (isLoading) {
+//                    isLoading = false;
+//                    discoveryAdapter.stopLoading();
+//                }
+//
+//                Log.d(TAG, "Favorites loaded, size: " + movies.size());
+//
+//                discoveryAdapter.setMovies(movies);
+//
+//            }
+//        });
+    }
 
-        favorites.observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
+    private void setupDiscoveryAdapter() {
+        if (discoveryAdapter != null && discoveryAdapter instanceof ListDiscoveryAdapter)
+            return;
 
-                if (!currentSortOption.equals(SortOption.FAVORITS))
-                    return;
+        if (discoveryAdapter != null)
+            unregisterMovieClickListener(discoveryAdapter);
 
-                if (isLoading) {
-                    isLoading = false;
-                    discoveryAdapter.stopLoading();
-                }
+        discoveryAdapter = new ListDiscoveryAdapter(this);
+        discoveryRecyclerView.setAdapter(discoveryAdapter);
+        registerMovieClickListener(discoveryAdapter);
+        registerScrollListener();
+        unregisterFavoritesObserver();
+    }
 
-                Log.d(TAG, "Favorites loaded, size: " + movies.size());
+    private void setupFavoritesAdapter() {
+        if (discoveryAdapter != null && discoveryAdapter instanceof CursorDiscoveryAdapter)
+            return;
 
-                discoveryAdapter.setMovies(movies);
+        if (discoveryAdapter != null)
+            unregisterMovieClickListener(discoveryAdapter);
 
-            }
-        });
+        discoveryAdapter = new CursorDiscoveryAdapter(this);
+        discoveryRecyclerView.setAdapter(discoveryAdapter);
+        registerMovieClickListener(discoveryAdapter);
+        unregisterScrollListener();
+        registerFavoritesObserver();
     }
 
     /**
@@ -475,7 +585,15 @@ public class DiscoveryActivity extends AppCompatActivity {
     public Parcelable saveInstanceState() {
 
         SavedInstanceState state = new SavedInstanceState();
-        state.movies = discoveryAdapter.getMovies();
+
+        if (discoveryAdapter != null) {
+            if (discoveryAdapter instanceof ListDiscoveryAdapter) {
+                state.movies = ((ListDiscoveryAdapter) discoveryAdapter).getMovies();
+            } else if (discoveryAdapter instanceof CursorDiscoveryAdapter) {
+                // TODO save cursor
+            }
+        }
+
         state.pageCount = pageCount;
         state.totalPageCount = totalPageCount;
         state.isLoading = this.isLoading;
@@ -491,10 +609,18 @@ public class DiscoveryActivity extends AppCompatActivity {
      * @param savedInstanceState {@link Parcelable} generated by saveInstanceState()
      */
     public void restoreInstanceState(Parcelable savedInstanceState) {
+
         SavedInstanceState state = Parcels.unwrap(savedInstanceState);
 
-        // NOTE: setting the List directly inside the adapter works as well!
-        discoveryAdapter.addAll(state.movies);
+        // NOTE: setting the List directly inside the adapter setMovies() works as well as addAll()
+        if (discoveryAdapter != null) {
+            if (discoveryAdapter instanceof ListDiscoveryAdapter) {
+                ((ListDiscoveryAdapter) discoveryAdapter).setMovies(state.movies);
+            } else if (discoveryAdapter instanceof CursorDiscoveryAdapter) {
+                // TODO restore cursor
+            }
+        }
+
         this.pageCount = state.pageCount;
         this.totalPageCount = state.totalPageCount;
         this.isLoading = state.isLoading;
@@ -550,6 +676,56 @@ public class DiscoveryActivity extends AppCompatActivity {
         @Override
         public boolean isLoading() {
             return isLoading;
+        }
+    }
+
+    class FavoritesObserver extends ContentObserver {
+        public FavoritesObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            this.onChange(selfChange, null);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            observe();
+        }
+
+        private void observe() {
+
+            if (!isLoading) {
+                isLoading = true;
+                discoveryAdapter.startLoading();
+            }
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+
+                    final Cursor cursor = getContentResolver().query(MoviesContract.CONTENT_URI,
+                            null, null, null, null);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if (!currentSortOption.equals(SortOption.FAVORITES))
+                                return;
+
+                            if (isLoading) {
+                                isLoading = false;
+                                discoveryAdapter.stopLoading();
+                            }
+
+                            ((CursorDiscoveryAdapter) discoveryAdapter).swapCursor(cursor);
+
+                            Log.d(TAG, "Favorites loaded, size: " + cursor.getCount());
+                        }
+                    });
+                }
+            });
         }
     }
 }
