@@ -473,7 +473,7 @@ public class DiscoveryActivity extends AppCompatActivity {
         /*
           Using ContentObserver
          */
-//        favoritesObserver.observe();
+        favoritesObserver.observe();
 
         // Start loading
 //        if (!isLoading) {
@@ -481,41 +481,41 @@ public class DiscoveryActivity extends AppCompatActivity {
 //            discoveryAdapter.startLoading();
 //        }
 
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                /*
-                  Using Cursor by ContentResolver
-                 */
-//                final Cursor cursor = getContentResolver().query(MoviesContract.CONTENT_URI,
-//                        null, null, null, null);
-
-                /*
-                   Using Cursor by Room
-                  */
-                final Cursor cursor = favoritesDao.getAllCursor();
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        if (!currentSortOption.equals(SortOption.FAVORITES))
-                            return;
-
-                        // Stop loading
-                        if (isLoading) {
-                            isLoading = false;
-                            discoveryAdapter.stopLoading();
-                        }
-
-                        ((CursorDiscoveryAdapter) discoveryAdapter).swapCursor(cursor);
-
-                        Log.d(TAG, "Favorites loaded, size: " + cursor.getCount());
-                    }
-                });
-            }
-        });
+//        AsyncTask.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                /*
+//                  Using Cursor by ContentResolver
+//                 */
+////                final Cursor cursor = getContentResolver().query(MoviesContract.CONTENT_URI,
+////                        null, null, null, null);
+//
+//                /*
+//                   Using Cursor by Room
+//                  */
+////                final Cursor cursor = favoritesDao.getAllCursor();
+//
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        if (!currentSortOption.equals(SortOption.FAVORITES))
+//                            return;
+//
+//                        // Stop loading
+//                        if (isLoading) {
+//                            isLoading = false;
+//                            discoveryAdapter.stopLoading();
+//                        }
+//
+//                        ((CursorDiscoveryAdapter) discoveryAdapter).swapCursor(cursor);
+//
+//                        Log.d(TAG, "Favorites loaded, size: " + cursor.getCount());
+//                    }
+//                });
+//            }
+//        });
 
         /*
           Using Room's LiveData (requires ListDiscoveryAdapter)
@@ -619,6 +619,7 @@ public class DiscoveryActivity extends AppCompatActivity {
                 ((ListDiscoveryAdapter) discoveryAdapter).setMovies(state.movies);
             } else if (discoveryAdapter instanceof CursorDiscoveryAdapter) {
                 // TODO restore cursor
+                loadFavorites();
             }
         }
 
