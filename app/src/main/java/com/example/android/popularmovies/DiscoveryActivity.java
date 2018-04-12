@@ -137,8 +137,19 @@ public class DiscoveryActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(this, gridColumns);
         discoveryRecyclerView.setLayoutManager(layoutManager);
 
+        String preferenceValue = PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getString(sortPrefKey, sortPrefDefault);
+
+
+        if (sortPrefFavorites.equals(preferenceValue)) {
+            setupFavoritesAdapter();
+        } else {
+            setupDiscoveryAdapter();
+        }
+
         if (savedInstanceState == null) {
-            loadSortPreferences();
+            loadSortPreferences(preferenceValue);
         } else {
             Parcelable adapterState = savedInstanceState.getParcelable(ADAPTER_STATE_BUNDLE_KEY);
             Parcelable layoutState = savedInstanceState.getParcelable(LAYOUT_STATE_BUNDLE_KEY);
@@ -279,47 +290,45 @@ public class DiscoveryActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
+        String preferenceValue = null;
         switch (item.getItemId()) {
             case R.id.menu_sort_by_popularity:
-                saveSortPreferences(R.string.pref_discovery_sort_popularity);
+                preferenceValue = getString(R.string.pref_discovery_sort_popularity);
                 break;
 
             case R.id.menu_sort_by_top_rated:
-                saveSortPreferences(R.string.pref_discovery_sort_top_rated);
+                preferenceValue = getString(R.string.pref_discovery_sort_top_rated);
                 break;
 
             case R.id.menu_sort_by_release_date:
-                saveSortPreferences(R.string.pref_discovery_sort_release_date);
+                preferenceValue = getString(R.string.pref_discovery_sort_release_date);
                 break;
 
             case R.id.menu_sort_by_revenue:
-                saveSortPreferences(R.string.pref_discovery_sort_revenue);
+                preferenceValue = getString(R.string.pref_discovery_sort_revenue);
                 break;
 
             case R.id.menu_favorites:
-                saveSortPreferences(R.string.pref_discovery_sort_favorites);
+                preferenceValue = getString(R.string.pref_discovery_sort_favorites);
                 break;
 
         }
-
-        loadSortPreferences();
+        saveSortPreferences(preferenceValue);
+        loadSortPreferences(preferenceValue);
 
         return true;
     }
 
-    private void saveSortPreferences(int preferenceId) {
+    private void saveSortPreferences(String preferenceValue) {
         SharedPreferences preferences =
                 PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(sortPrefKey, getString(preferenceId));
+        editor.putString(sortPrefKey, preferenceValue);
         editor.apply();
 
     }
 
-    private void loadSortPreferences() {
-        String preferenceValue = PreferenceManager
-                .getDefaultSharedPreferences(this)
-                .getString(sortPrefKey, sortPrefDefault);
+    private void loadSortPreferences(String preferenceValue) {
 
         if (sortPrefPopularity.equals(preferenceValue)) {
             setTitle(R.string.popular_movies);
