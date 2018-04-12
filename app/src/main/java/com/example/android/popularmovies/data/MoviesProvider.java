@@ -242,8 +242,9 @@ public class MoviesProvider extends ContentProvider {
                 String idSegment = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
                 Long id = Long.parseLong(idSegment);
 
-                // TODO Try deleting with movie id only
-                Movie exists = dao.getMovie(id);
+                // Movie exists = dao.getMovie(id);
+                Movie exists = new Movie();
+                exists.setId(id.intValue());
                 if (exists != null) {
                     dao.delete(exists);
                     count = 1;
