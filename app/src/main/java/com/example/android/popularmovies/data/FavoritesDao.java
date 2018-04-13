@@ -6,6 +6,7 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.database.Cursor;
+import android.net.Uri;
 
 import java.util.List;
 
@@ -47,11 +48,11 @@ public interface FavoritesDao {
     Cursor getMovieCursor(long movieId);
 
     @Insert(onConflict = REPLACE)
-    void insert(Movie movie);
+    Long insert(Movie movie);
 
     @Insert(onConflict = REPLACE)
-    void insertAll(Movie... movies);
+    List<Long> insertAll(Movie... movies);
 
     @Delete
-    void delete(Movie movie);
+    int delete(Movie movie);
 }

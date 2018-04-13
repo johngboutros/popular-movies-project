@@ -206,9 +206,9 @@ public class MoviesProvider extends ContentProvider {
 
         Movie movie = new Movie(values);
 
-        dao.insert(movie);
+        Long inserted = dao.insert(movie);
 
-        Uri insertedUri = ContentUris.withAppendedId(CONTENT_URI, movie.getId());
+        Uri insertedUri = ContentUris.withAppendedId(CONTENT_URI, inserted);
 
         getContext().getContentResolver().notifyChange(insertedUri, null);
 
@@ -247,16 +247,16 @@ public class MoviesProvider extends ContentProvider {
                 // Movie exists = dao.getMovie(id);
                 Movie exists = new Movie();
                 exists.setId(id.intValue());
-                if (exists != null) {
-                    dao.delete(exists);
-                    count = 1;
-                }
+
+                count = dao.delete(exists);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
 
-        getContext().getContentResolver().notifyChange(uri, null);
+        if (count > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return count;
     }
 
