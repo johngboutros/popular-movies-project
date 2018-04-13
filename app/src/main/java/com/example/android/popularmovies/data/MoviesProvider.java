@@ -210,6 +210,8 @@ public class MoviesProvider extends ContentProvider {
 
         Uri insertedUri = ContentUris.withAppendedId(CONTENT_URI, movie.getId());
 
+        getContext().getContentResolver().notifyChange(insertedUri, null);
+
         return insertedUri;
     }
 
