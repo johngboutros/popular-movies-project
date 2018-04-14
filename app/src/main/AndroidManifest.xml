@@ -11,7 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".DiscoveryActivity" android:launchMode="singleTop">
+        <activity android:name=".activity.DiscoveryActivity" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -19,11 +19,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MovieDetailsActivity"
-            android:parentActivityName=".DiscoveryActivity">
+            android:name=".activity.MovieDetailsActivity"
+            android:parentActivityName=".activity.DiscoveryActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.android.popularmovies.DiscoveryActivity" />
+                android:value="com.example.android.popularmovies.activity.DiscoveryActivity" />
         </activity>
         <provider
             android:name="com.example.android.popularmovies.data.MoviesProvider"

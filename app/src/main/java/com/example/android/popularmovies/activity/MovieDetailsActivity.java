@@ -1,4 +1,4 @@
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.activity;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.data.FavoritesDao;
 import com.example.android.popularmovies.data.FavoritesDatabase;
 import com.example.android.popularmovies.data.Movie;
@@ -60,9 +61,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
     TextView yearDisplay;
 
     private static final String YEAR_FORMAT = "yyyy";
-
-//    @BindView(R.id.movie_detail_duration_tv)
-//    TextView durationDisplay;
 
     @BindView(R.id.movie_detail_rate_tv)
     TextView rateDisplay;
@@ -104,12 +102,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     // Not null if this movie was saved as favorite
     private Movie favorite;
-
-    // Share menu-item's ActionProvider
-    // private ShareActionProvider shareActionProvider;
-
-    // Share text (first trailer link if exists)
-    // private String shareTrailerUrl;
 
     // Share text (first trailer link if exists)
     private String shareText;
@@ -513,11 +505,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 .setText(text)
                 .getIntent();
 
-        // Call to update the share intent
-        // if (shareActionProvider != null) {
-        //     shareActionProvider.setShareIntent(intent);
-        // }
-
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         }
@@ -528,12 +515,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         // Inflate menu resource file.
         getMenuInflater().inflate(R.menu.activity_movie_details, menu);
-
-        // Locate MenuItem with ShareActionProvider
-        // MenuItem item = menu.findItem(R.id.menu_item_share);
-
-        // Fetch and store ShareActionProvider
-        // shareActionProvider = (ShareActionProvider) item.getActionProvider();
 
         // Return true to display menu
         return true;

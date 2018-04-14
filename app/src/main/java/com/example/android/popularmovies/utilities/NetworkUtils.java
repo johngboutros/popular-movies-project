@@ -15,7 +15,7 @@ import com.android.volley.toolbox.Volley;
  * Utilities singleton to handle network requests.
  */
 
-public class NetworkUtils {
+public final class NetworkUtils {
 
     private Context context;
 
@@ -42,7 +42,7 @@ public class NetworkUtils {
      */
     private final static int IMAGES_CACHE_MAX_SIZE = 20;
 
-
+    // For internal use only
     private NetworkUtils(Context context) {
 
         if (context == null)
@@ -51,6 +51,11 @@ public class NetworkUtils {
         this.context = context;
         getRequestQueue();
         getImageLoader();
+    }
+
+    // NetworkUtils can't be initialized without args
+    private NetworkUtils() {
+        throw new AssertionError("NetworkUtils can't be initialized without args");
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,7 +22,11 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.example.android.popularmovies.AbstractDiscoveryAdapter.MovieClickListener;
+import com.example.android.popularmovies.adapter.AbstractDiscoveryAdapter;
+import com.example.android.popularmovies.adapter.AbstractDiscoveryAdapter.MovieClickListener;
+import com.example.android.popularmovies.adapter.CursorDiscoveryAdapter;
+import com.example.android.popularmovies.adapter.ListDiscoveryAdapter;
+import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.components.PaginationScrollListener;
 import com.example.android.popularmovies.data.FavoritesDao;
 import com.example.android.popularmovies.data.FavoritesDatabase;

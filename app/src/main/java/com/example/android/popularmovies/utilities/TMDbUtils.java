@@ -18,7 +18,7 @@ import java.util.Date;
  * Utilities to be used to communicate with the TMDb API.
  */
 
-public class TMDbUtils {
+public final class TMDbUtils {
 
     private static final String TAG = TMDbUtils.class.getSimpleName();
 
@@ -123,6 +123,11 @@ public class TMDbUtils {
     public enum SortBy {
         POPULARITY, RELEASE_DATE, REVENUE, PRIMARY_RELEASE_DATE, PRIMARY_ORIGINAL_TITLE,
         VOTE_AVERAGE, VOTE_COUNT
+    }
+
+    // This class should be used in a static way and never be initialized
+    private TMDbUtils(){
+        throw new AssertionError("No instances for you");
     }
 
     /**
