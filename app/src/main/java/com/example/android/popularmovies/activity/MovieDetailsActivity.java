@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -98,6 +99,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.movie_detail_favorite_btn)
     Button favoriteButton;
 
+    @BindView(R.id.movie_detail_scroll_sv)
+    ScrollView scrollView;
+
     private FavoritesDao favoritesDao;
 
     // Not null if this movie was saved as favorite
@@ -108,6 +112,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     // Year format
     private final SimpleDateFormat yearFormat = new SimpleDateFormat(YEAR_FORMAT);
+
+    // Saved instance state Bundle keys
+    private final static String SCROLL_STATE_BUNDLE_KEY = "scroll_state";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -537,5 +544,24 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        int scrollY = scrollView.getScrollY();
+        outState.putInt(SCROLL_STATE_BUNDLE_KEY, scrollY);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        final int scrollY = savedInstanceState.getInt(SCROLL_STATE_BUNDLE_KEY);
+        scrollView.post(new Runnable() {
+            @Override
+            public void run() {
+                scrollView.setScrollY(scrollY);
+            }
+        });
     }
 }
