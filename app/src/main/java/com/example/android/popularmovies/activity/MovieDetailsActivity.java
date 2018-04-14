@@ -113,6 +113,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     // Saved instance state Bundle keys
     private final static String SCROLL_STATE_BUNDLE_KEY = "scroll_state";
+    private Float pendingScrollPercent;
+
+    // Tracking loaded sections
+    private boolean videosLoaded;
+    private boolean reviewsLoaded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -189,6 +194,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
     private void loadVideos(@NonNull final Movie movie) {
+
+        videosLoaded = false;
 
         String url = TMDbUtils.buildMovieVideosUrl(movie.getId()).toString();
 
@@ -277,6 +284,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
                                     .parseDate(movie.getReleaseDate())) + ")";
                         }
 
+                        videosLoaded = true;
+                        notifyLoaded();
+
                     }
                 },
                 new Response.ErrorListener() {
@@ -287,6 +297,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
                         trailersLoading.setVisibility(View.GONE);
 
                         hideTrailersView();
+
+                        videosLoaded = true;
+                        notifyLoaded();
 
                         Toast.makeText(MovieDetailsActivity.this,
                                 getString(R.string.movie_detail_load_trailers_error),
@@ -300,6 +313,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
     private void loadReviews(@NonNull Movie movie) {
+
+        reviewsLoaded = false;
 
         String url = TMDbUtils.buildMovieReviewsUrl(movie.getId()).toString();
 
@@ -369,6 +384,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
                             hideReviewsView();
                         }
 
+                        reviewsLoaded = true;
+                        notifyLoaded();
+
                     }
                 },
                 new Response.ErrorListener() {
@@ -379,6 +397,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
                         reviewsLoading.setVisibility(View.GONE);
 
                         hideReviewsView();
+
+                        reviewsLoaded = true;
+                        notifyLoaded();
 
                         Toast.makeText(MovieDetailsActivity.this,
                                 getString(R.string.movie_detail_load_reviews_error),
@@ -550,18 +571,36 @@ public class MovieDetailsActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         int scrollY = scrollView.getScrollY();
-        outState.putInt(SCROLL_STATE_BUNDLE_KEY, scrollY);
+        int maxScrollY = scrollView.getChildAt(0).getHeight();
+        outState.putFloat(SCROLL_STATE_BUNDLE_KEY, getScrollPercent(scrollY, maxScrollY));
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        final int scrollY = savedInstanceState.getInt(SCROLL_STATE_BUNDLE_KEY);
-        scrollView.post(new Runnable() {
-            @Override
-            public void run() {
-                scrollView.setScrollY(scrollY);
+        pendingScrollPercent = savedInstanceState.getFloat(SCROLL_STATE_BUNDLE_KEY);
+    }
+
+    private static float getScrollPercent(int scrollY, int maxScrollY) {
+        return scrollY * 100 / maxScrollY;
+    }
+
+    private static int getScrollY(float scrollYPercent, int maxScrollY) {
+        return (int) scrollYPercent * maxScrollY / 100;
+    }
+
+    private void notifyLoaded() {
+        if (videosLoaded && reviewsLoaded) {
+            if (pendingScrollPercent != null) {
+                scrollView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int maxScrollY = scrollView.getChildAt(0).getHeight();
+                        scrollView.setScrollY(getScrollY(pendingScrollPercent, maxScrollY));
+                        pendingScrollPercent = null;
+                    }
+                });
             }
-        });
+        }
     }
 }
