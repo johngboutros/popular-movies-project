@@ -6,13 +6,18 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import static com.example.android.popularmovies.data.MoviesContract.*;
+import com.example.android.popularmovies.data.MoviesContract.Columns;
+
+import static com.example.android.popularmovies.data.MoviesContract.AUTHORITY;
+import static com.example.android.popularmovies.data.MoviesContract.CONTENT_URI;
+import static com.example.android.popularmovies.data.MoviesContract.PATH;
 
 /**
  * Created by john on 09/04/18.
@@ -24,13 +29,18 @@ public class MoviesProvider extends ContentProvider {
     static final int MOVIE_ID_URI_CODE = 2;
 
     static final UriMatcher uriMatcher;
+
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(AUTHORITY, PATH, MOVIES_URI_CODE);
         uriMatcher.addURI(AUTHORITY, PATH + "/#", MOVIE_ID_URI_CODE);
     }
 
-    private FavoritesDao dao;
+    /*
+     * Defines a handle to the database helper object. The FavoritesDatabaseHelper class is defined
+     * in a following snippet.
+     */
+    private FavoritesDatabaseHelper mOpenHelper;
 
     /**
      * Implement this to initialize your content provider on startup.
@@ -59,8 +69,14 @@ public class MoviesProvider extends ContentProvider {
      */
     @Override
     public boolean onCreate() {
-        dao = FavoritesDatabase.get(getContext()).favoritesDao();
-        return dao != null;
+        /*
+         * Creates a new helper object. This method always returns quickly.
+         * Notice that the database itself isn't created or opened
+         * until SQLiteOpenHelper.getWritableDatabase is called
+         */
+        mOpenHelper = new FavoritesDatabaseHelper(getContext());
+
+        return true;
     }
 
     /**
@@ -130,14 +146,28 @@ public class MoviesProvider extends ContentProvider {
 
         Cursor cursor = null;
 
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+
         switch (uriMatcher.match(uri)) {
             case MOVIES_URI_CODE:
-                cursor = dao.getAllCursor();
+                cursor = db.query(FavoritesDatabaseHelper.TABLE_NAME,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        Columns.CREATION_DATE + " DESC");
                 break;
             case MOVIE_ID_URI_CODE:
                 String idSegment = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
                 Long id = Long.parseLong(idSegment);
-                cursor = dao.getMovieCursor(id);
+                cursor = db.query(FavoritesDatabaseHelper.TABLE_NAME,
+                        null,
+                        Columns.UID + "=" + id,
+                        null,
+                        null,
+                        null,
+                        null);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
@@ -206,7 +236,9 @@ public class MoviesProvider extends ContentProvider {
 
         Movie movie = new Movie(values);
 
-        Long inserted = dao.insert(movie);
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+
+        long inserted = db.insertOrThrow(FavoritesDatabaseHelper.TABLE_NAME, null, values);
 
         Uri insertedUri = ContentUris.withAppendedId(CONTENT_URI, inserted);
 
@@ -244,11 +276,12 @@ public class MoviesProvider extends ContentProvider {
                 String idSegment = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
                 Long id = Long.parseLong(idSegment);
 
-                // Movie exists = dao.getMovie(id);
-                Movie exists = new Movie();
-                exists.setId(id.intValue());
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
-                count = dao.delete(exists);
+                count = db.delete(FavoritesDatabaseHelper.TABLE_NAME,
+                        Columns.UID + "=" + id,
+                        null);
+
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);

@@ -1,12 +1,9 @@
 package com.example.android.popularmovies.data;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.PrimaryKey;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import com.example.android.popularmovies.data.MoviesContract.Columns;
 import com.google.gson.annotations.SerializedName;
 
 import org.parceler.Parcel;
@@ -14,13 +11,10 @@ import org.parceler.Parcel;
 import java.util.Date;
 import java.util.List;
 
-import com.example.android.popularmovies.data.MoviesContract.Columns;
-
 /**
  * Created by john on 03/03/18.
  */
 
-@Entity(tableName = FavoritesDao.TABLE_NAME)
 @Parcel
 public class Movie  {
 
@@ -43,59 +37,44 @@ public class Movie  {
     //  video               boolean             optional
     //  vote_average        number              optional
 
-    @ColumnInfo(name = Columns.POSTER_PATH)
     @SerializedName("poster_path")
     String posterPath;
 
     boolean adult;
 
-    @ColumnInfo(name = Columns.OVERVIEW)
     String overview;
 
-    @ColumnInfo(name = Columns.RELEASE_DATE)
     @SerializedName("release_date")
     String releaseDate;
 
-    @Ignore
     @SerializedName("genre_ids")
     List<Integer> genreIds;
 
-    @Ignore
     List<Genre> genres;
 
-    @PrimaryKey
-    @ColumnInfo(name = Columns.UID)
     Integer id;
 
-    @Ignore
     @SerializedName("original_title")
     String originalTitle;
 
-    @Ignore
     @SerializedName("original_language")
     String originalLanguage;
 
-    @ColumnInfo(name = Columns.TITLE)
     String title;
 
-    @Ignore
     @SerializedName("backdrop_path")
     String backdropPath;
 
-    @Ignore
     float popularity;
 
-    @Ignore
     @SerializedName("vote_count")
     Integer voteCount;
 
     boolean video;
 
-    @ColumnInfo(name = Columns.VOTE_AVERAGE)
     @SerializedName("vote_average")
     float voteAverage;
 
-    @ColumnInfo(name = Columns.CREATION_DATE)
     Date creationDate = new Date();
 
     @Parcel
@@ -199,7 +178,7 @@ public class Movie  {
         setOverview(cursor.getString(cursor.getColumnIndex(Columns.OVERVIEW)));
         setVoteAverage(cursor.getFloat(cursor.getColumnIndex(Columns.VOTE_AVERAGE)));
         setReleaseDate(cursor.getString(cursor.getColumnIndex(Columns.RELEASE_DATE)));
-        setCreationDate(FavoritesDatabase.Converters.fromTimestamp(cursor.getLong(cursor
+        setCreationDate(Converters.fromTimestamp(cursor.getLong(cursor
                         .getColumnIndex(Columns.CREATION_DATE))));
     }
 
@@ -211,7 +190,7 @@ public class Movie  {
         setOverview(values.getAsString(Columns.OVERVIEW));
         setVoteAverage(values.getAsFloat(Columns.VOTE_AVERAGE));
         setReleaseDate(values.getAsString(Columns.RELEASE_DATE));
-        setCreationDate(FavoritesDatabase.Converters
+        setCreationDate(Converters
                 .fromTimestamp(values.getAsLong(Columns.CREATION_DATE)));
     }
 
@@ -223,7 +202,7 @@ public class Movie  {
         cv.put(Columns.OVERVIEW, getOverview());
         cv.put(Columns.RELEASE_DATE, getReleaseDate());
         cv.put(Columns.VOTE_AVERAGE, getVoteAverage());
-        cv.put(Columns.CREATION_DATE, FavoritesDatabase.Converters
+        cv.put(Columns.CREATION_DATE, Converters
                 .toTimestamp(getCreationDate()));
         return cv;
     }
@@ -376,5 +355,15 @@ public class Movie  {
                 ", voteAverage=" + voteAverage +
                 ", creationDate=" + creationDate +
                 '}';
+    }
+
+    public static class Converters {
+        public static Date fromTimestamp(Long value) {
+            return value == null ? null : new Date(value);
+        }
+
+        public static Long toTimestamp(Date date) {
+            return date == null ? null : date.getTime();
+        }
     }
 }

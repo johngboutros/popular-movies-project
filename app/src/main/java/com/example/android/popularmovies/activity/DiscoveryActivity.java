@@ -22,14 +22,12 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.adapter.AbstractDiscoveryAdapter;
 import com.example.android.popularmovies.adapter.AbstractDiscoveryAdapter.MovieClickListener;
 import com.example.android.popularmovies.adapter.CursorDiscoveryAdapter;
 import com.example.android.popularmovies.adapter.ListDiscoveryAdapter;
-import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.components.PaginationScrollListener;
-import com.example.android.popularmovies.data.FavoritesDao;
-import com.example.android.popularmovies.data.FavoritesDatabase;
 import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.data.MoviesContract;
 import com.example.android.popularmovies.utilities.GsonRequest;
@@ -124,18 +122,12 @@ public class DiscoveryActivity extends AppCompatActivity {
     // Favorites Observer
     private FavoritesObserver favoritesObserver;
 
-    // Favorites DAO
-    private FavoritesDao favoritesDao;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_discovery);
         ButterKnife.bind(this);
-
-        favoritesDao = FavoritesDatabase.get(this).favoritesDao();
 
         discoveryRecyclerView.setHasFixedSize(true);
         GridLayoutManager layoutManager = new GridLayoutManager(this, gridColumns);
@@ -472,79 +464,6 @@ public class DiscoveryActivity extends AppCompatActivity {
           Using ContentObserver
          */
         favoritesObserver.observe(layoutState);
-
-        // Start loading
-//        if (!isLoading) {
-//            isLoading = true;
-//            discoveryAdapter.startLoading();
-//        }
-
-//        AsyncTask.execute(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                /*
-//                  Using Cursor by ContentResolver
-//                 */
-////                final Cursor cursor = getContentResolver().query(MoviesContract.CONTENT_URI,
-////                        null, null, null, null);
-//
-//                /*
-//                   Using Cursor by Room
-//                  */
-////                final Cursor cursor = favoritesDao.getAllCursor();
-//
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        if (!currentSortOption.equals(SortOption.FAVORITES))
-//                            return;
-//
-//                        // Stop loading
-//                        if (isLoading) {
-//                            isLoading = false;
-//                            discoveryAdapter.stopLoading();
-//                        }
-//
-//                        ((CursorDiscoveryAdapter) discoveryAdapter).swapCursor(cursor);
-//
-//                        Log.d(TAG, "Favorites loaded, size: " + cursor.getCount());
-//                    }
-//                });
-//            }
-//        });
-
-        /*
-          Using Room's LiveData (requires ListDiscoveryAdapter)
-
-          (Recommended as besides leveraging Room's sync implementation
-           and saving data access boilerplate code, it allows using the same
-           Adapter as discovery which based on a List; eliminating the code
-           to maintain both types of adapters e.g. listeners registration
-           and instance restoring)
-         */
-//        LiveData<List<Movie>> favorites = favoritesDao.getAllAsync();
-//
-//        favorites.observe(this, new Observer<List<Movie>>() {
-//            @Override
-//            public void onChanged(@Nullable List<Movie> movies) {
-//
-//                if (!currentSortOption.equals(SortOption.FAVORITES))
-//                    return;
-//
-//                // Stop loading
-//                if (isLoading) {
-//                    isLoading = false;
-//                    discoveryAdapter.stopLoading();
-//                }
-//
-//                Log.d(TAG, "Favorites loaded, size: " + movies.size());
-//
-//                discoveryAdapter.setMovies(movies);
-//
-//            }
-//        });
 
     }
 

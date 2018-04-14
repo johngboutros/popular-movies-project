@@ -1,6 +1,7 @@
 package com.example.android.popularmovies.activity;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -24,8 +25,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.example.android.popularmovies.R;
-import com.example.android.popularmovies.data.FavoritesDao;
-import com.example.android.popularmovies.data.FavoritesDatabase;
 import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.data.MoviesContract;
 import com.example.android.popularmovies.data.Review;
@@ -102,8 +101,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.movie_detail_scroll_sv)
     ScrollView scrollView;
 
-    private FavoritesDao favoritesDao;
-
     // Not null if this movie was saved as favorite
     private Movie favorite;
 
@@ -121,8 +118,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
         ButterKnife.bind(this);
-
-        favoritesDao = FavoritesDatabase.get(this).favoritesDao();
 
         final Movie movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_EXTRA_PARAM));
 
@@ -167,7 +162,18 @@ public class MovieDetailsActivity extends AppCompatActivity {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                favorite = favoritesDao.getMovie(movie.getId());
+
+                Cursor cursor = getContentResolver()
+                        .query(MoviesContract.CONTENT_URI.buildUpon()
+                                        .appendPath("" + movie.getId()).build(),
+                                null,
+                                null,
+                                null,
+                                null);
+
+                if (cursor.moveToFirst()) {
+                    favorite = new Movie(cursor);
+                }
 
                 // Setup favorite view if exists
                 runOnUiThread(new Runnable() {
@@ -421,11 +427,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
                   */
                 getContentResolver().insert(MoviesContract.CONTENT_URI, movie.toContentValues());
 
-                /*
-                   Using Room DAO
-                  */
-//                 favoritesDao.insert(movie);
-
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -457,11 +458,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 getContentResolver().delete(MoviesContract.CONTENT_URI.buildUpon()
                                 .appendPath("" + movie.getId()).build(), null,
                         null);
-
-                /*
-                   Using Room DAO
-                  */
-//                 favoritesDao.delete(movie);
 
                 runOnUiThread(new Runnable() {
                     @Override
