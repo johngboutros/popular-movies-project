@@ -38,6 +38,7 @@ import com.squareup.picasso.Picasso;
 import org.parceler.Parcels;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 
 import butterknife.BindString;
@@ -415,6 +416,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
+
+                // Set creation date at the time it were added
+                movie.setCreationDate(new Date());
 
                 /*
                    Using ContentResolver
